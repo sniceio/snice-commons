@@ -47,10 +47,8 @@
     </properties>
 
     <modules>
-        <module>snice-preconditions</module>
-
-	<!-- take all modules and merge into once super nice big one -->
         <module>snice-commons</module>
+        <module>snice-buffers</module>
     </modules>
 
     <dependencyManagement>
@@ -58,7 +56,15 @@
 
             <dependency>
                 <groupId>io.snice</groupId>
-                <artifactId>snice-preconditions</artifactId>
+                <artifactId>snice-commons</artifactId>
+                <version>${project.version}</version>
+                <type>jar</type>
+                <scope>compile</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>io.snice</groupId>
+                <artifactId>snice-buffers</artifactId>
                 <version>${project.version}</version>
                 <type>jar</type>
                 <scope>compile</scope>
