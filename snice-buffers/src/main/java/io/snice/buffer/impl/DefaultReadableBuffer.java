@@ -404,6 +404,26 @@ public class DefaultReadableBuffer implements ReadableBuffer  {
     }
 
     @Override
+    public boolean endsWith(final byte b) {
+        return buffer.endsWith(b);
+    }
+
+    @Override
+    public boolean endsWith(final byte b1, final byte b2) {
+        return buffer.endsWith(b1, b2);
+    }
+
+    @Override
+    public boolean endsWith(final byte b1, final byte b2, final byte b3) {
+        return buffer.endsWith(b1, b2, b3);
+    }
+
+    @Override
+    public boolean endsWith(final byte b1, final byte b2, final byte b3, final byte b4) {
+        return buffer.endsWith(b1, b2, b3, b4);
+    }
+
+    @Override
     public String dumpAsHex() {
         return buffer.dumpAsHex();
     }

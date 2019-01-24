@@ -29,6 +29,20 @@ public abstract class AbstractBufferTest {
     }
 
     @Test
+    public void testEndsWithByte() {
+        ensureEndsWith(createBuffer("hello world grejor"), (byte)'r');
+        ensureEndsWith(createBuffer("hello world grejor"), (byte)'o', (byte)'r');
+        ensureEndsWith(createBuffer("hello world grejor"), (byte)'j', (byte)'o', (byte)'r');
+        ensureEndsWith(createBuffer("hello world grejor"), (byte)'e', (byte)'j', (byte)'o', (byte)'r');
+
+        assertThat(createBuffer("hello world grejor\r\n").endsWithCRLF(), is(true));
+        assertThat(createBuffer("hello world grejor\r\n nisse").endsWithCRLF(), is(false));
+
+        assertThat(createBuffer("\r\n").endsWithCRLF(), is(true));
+        assertThat(createBuffer("\r\n\r\n").endsWithDoubleCRLF(), is(true));
+    }
+
+    @Test
     public void testEndsWith() {
         ensureEndsWith(createBuffer("hello world ena goa grejor"), "grejor");
         ensureEndsWith(createBuffer("hello ena goa "), "goa ");
@@ -61,6 +75,22 @@ public abstract class AbstractBufferTest {
         assertThat(slice01b.toString(), is("world"));
         ensureEndsWith(slice01b, "world");
         ensureEndsWith(slice01b, "d");
+    }
+
+    private static void ensureEndsWith(final Buffer buffer, final byte b) {
+        assertThat(buffer.endsWith(b), is(true));
+    }
+
+    private static void ensureEndsWith(final Buffer buffer, final byte b1, final byte b2) {
+        assertThat(buffer.endsWith(b1, b2), is(true));
+    }
+
+    private static void ensureEndsWith(final Buffer buffer, final byte b1, final byte b2, final byte b3) {
+        assertThat(buffer.endsWith(b1, b2, b3), is(true));
+    }
+
+    private static void ensureEndsWith(final Buffer buffer, final byte b1, final byte b2, final byte b3, final byte b4) {
+        assertThat(buffer.endsWith(b1, b2, b3, b4), is(true));
     }
 
     private static void ensureNotEndsWith(final Buffer buffer, final byte[] bytes) {

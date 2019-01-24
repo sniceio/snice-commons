@@ -233,6 +233,44 @@ public class DefaultImmutableBuffer implements Buffer {
     }
 
     @Override
+    public boolean endsWith(final byte b) throws IllegalArgumentException {
+        return buffer[upperBoundary - 1] == b;
+    }
+
+    @Override
+    public boolean endsWith(final byte b1, final byte b2) throws IllegalArgumentException {
+        if (capacity() < 2) {
+            return false;
+        }
+
+        return buffer[upperBoundary - 2] == b1
+                && buffer[upperBoundary - 1] == b2;
+    }
+
+    @Override
+    public boolean endsWith(final byte b1, final byte b2, final byte b3) throws IllegalArgumentException {
+        if (capacity() < 3) {
+            return false;
+        }
+
+        return buffer[upperBoundary - 3] == b1
+                && buffer[upperBoundary - 2] == b2
+                && buffer[upperBoundary - 1] == b3;
+    }
+
+    @Override
+    public boolean endsWith(final byte b1, final byte b2, final byte b3, final byte b4) throws IllegalArgumentException {
+        if (capacity() < 4) {
+            return false;
+        }
+
+        return buffer[upperBoundary - 4] == b1
+                && buffer[upperBoundary - 3] == b2
+                && buffer[upperBoundary - 2] == b3
+                && buffer[upperBoundary - 1] == b4;
+    }
+
+    @Override
     public String dumpAsHex() {
         return HexDump.dumpHexString(buffer, lowerBoundary, upperBoundary - lowerBoundary);
     }

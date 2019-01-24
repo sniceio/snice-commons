@@ -285,6 +285,67 @@ public interface Buffer {
     boolean endsWith(final byte[] content) throws IllegalArgumentException;
 
     /**
+     * Convenience method for checking if this buffer ends with the specified byte.
+     *
+     * @param b
+     * @return true if the this buffer indeed ends with the specified byte, false otherwise.
+     */
+    boolean endsWith(final byte b);
+
+    /**
+     * Convenience method for checking if this buffer ends with the two specified bytes.
+     *
+     * Note that if the buffer is less than two bytes long then false will
+     * be returned, as opposed to throwing some kind of exception. The reasoning
+     * is that if the buffer is less than two bytes then obviously this buffer doesnt
+     * end with the specified bytes.
+     *
+     * @param b1
+     * @param b2
+     * @return true if the this buffer indeed ends with the specified bytes, false otherwise.
+     */
+    boolean endsWith(final byte b1, final byte b2);
+
+    /**
+     * Convenience method for checking if this buffer ends with the three specified bytes.
+     *
+     * Note that if the buffer is less than three bytes long then false will
+     * be returned, as opposed to throwing some kind of exception. The reasoning
+     * is that if the buffer is less than three bytes then obviously this buffer doesnt
+     * end with the specified bytes.
+     *
+     * @param b1
+     * @param b2
+     * @param b3
+     * @return true if the this buffer indeed ends with the specified bytes, false otherwise.
+     */
+    boolean endsWith(final byte b1, final byte b2, final byte b3);
+
+    /**
+     * Convenience method for checking if this buffer ends with the four specified bytes.
+     *
+     * Note that if the buffer is less than four bytes long then false will
+     * be returned, as opposed to throwing some kind of exception. The reasoning
+     * is that if the buffer is less than four bytes then obviously this buffer doesnt
+     * end with the specified bytes.
+     *
+     * @param b1
+     * @param b2
+     * @param b3
+     * @param b4
+     * @return true if the this buffer indeed ends with the specified bytes, false otherwise.
+     */
+    boolean endsWith(final byte b1, final byte b2, final byte b3, final byte b4);
+
+    default boolean endsWithCRLF() {
+        return endsWith(CR, LF);
+    }
+
+    default boolean endsWithDoubleCRLF() {
+        return endsWith(CR, LF, CR, LF);
+    }
+
+    /**
      * Dump the content of this buffer as a hex dump ala Wireshark. Mainly for
      * debugging purposes
      *

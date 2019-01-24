@@ -28,6 +28,26 @@ public class EmptyBuffer implements ReadableBuffer {
     }
 
     @Override
+    public boolean endsWith(final byte b) {
+        return false;
+    }
+
+    @Override
+    public boolean endsWith(final byte b1, final byte b2) {
+        return false;
+    }
+
+    @Override
+    public boolean endsWith(final byte b1, final byte b2, final byte b3) {
+        return false;
+    }
+
+    @Override
+    public boolean endsWith(final byte b1, final byte b2, final byte b3, final byte b4) {
+        return false;
+    }
+
+    @Override
     public ReadableBuffer toReadableBuffer() {
         return this;
     }
