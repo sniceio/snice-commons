@@ -34,7 +34,7 @@ public class DefaultImmutableBuffer implements Buffer {
             return EmptyBuffer.EMPTY;
         }
 
-        return new DefaultImmutableBuffer(buffer, offset, length);
+        return new DefaultImmutableBuffer(buffer, offset, offset + length);
     }
 
     /**
@@ -86,7 +86,7 @@ public class DefaultImmutableBuffer implements Buffer {
 
     @Override
     public boolean isEmpty() {
-        return false;
+        return capacity() == 0;
     }
 
     @Override

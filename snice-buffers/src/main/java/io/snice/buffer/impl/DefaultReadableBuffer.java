@@ -16,6 +16,11 @@ public class DefaultReadableBuffer implements ReadableBuffer  {
         return new DefaultReadableBuffer(buf, 0);
     }
 
+    public static ReadableBuffer of(final byte[] buffer, int offset, int length) {
+        final Buffer buf = DefaultImmutableBuffer.of(buffer, offset, length);
+        return new DefaultReadableBuffer(buf, 0);
+    }
+
     public static ReadableBuffer of(final Buffer buffer) {
         return new DefaultReadableBuffer(buffer.toBuffer(), 0);
     }

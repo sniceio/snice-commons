@@ -90,7 +90,7 @@ public final class PreConditions {
     }
 
     private static void assertArrayBoundaries(final int arraySize, final int offset, final int length, final String msg) throws IllegalArgumentException {
-        if (length > arraySize || offset < 0 || (offset != 0 && offset >= arraySize) || offset + length > arraySize ) {
+        if (length > arraySize || offset < 0 || (offset != 0 && offset >= arraySize) || offset + length > arraySize || length < 0 ) {
             throw new IllegalArgumentException(msg);
         }
     }

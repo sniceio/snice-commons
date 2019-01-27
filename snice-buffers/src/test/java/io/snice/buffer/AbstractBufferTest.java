@@ -24,8 +24,35 @@ public abstract class AbstractBufferTest {
      */
     public abstract Buffer createBuffer(final byte[] array);
 
+    public abstract Buffer createBuffer(final byte[] array, int offset, int length);
+
     public Buffer createBuffer(final String s) {
         return createBuffer(s.getBytes());
+    }
+
+    @Test
+    public void testCreateWithOffsetAndLength() {
+        ensureBuffer(0, 3, "hej", 'h', 'e', 'j');
+        ensureBuffer(0, 3, "hej", 'h', 'e', 'j', null, null, null, null);
+        ensureBuffer(2, 3, "hej", null, null, 'h', 'e', 'j', null, null, null, null);
+
+        // empty buffer but should be legal
+        ensureBuffer(2, 0, "", null, null, 'h', 'e', 'j', null, null, null, null);
+
+        ensureBuffer(2, 1, "h", null, null, 'h', 'e', 'j', null, null, null, null);
+    }
+
+    private void ensureBuffer(final int offset, final int length, final String expected, final Character... content) {
+        final byte[] buf = new byte[content.length];
+        for (int i = 0; i < content.length; ++i) {
+            buf[i] = content[i] != null ? (byte)content[i].charValue() : buf[i];
+        }
+
+        final Buffer buffer = createBuffer(buf, offset, length);
+        if (expected.isEmpty()) {
+            assertThat("This should be an empty buffer", buffer.isEmpty(), is(true));
+        }
+        assertThat(buffer.toString(), is(expected));
     }
 
     @Test

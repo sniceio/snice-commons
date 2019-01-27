@@ -6,12 +6,18 @@ import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 public class ImmutableBufferTest extends AbstractBufferTest {
 
     @Override
     public Buffer createBuffer(final byte[] array) {
         return DefaultImmutableBuffer.of(array);
+    }
+
+    @Override
+    public Buffer createBuffer(final byte[] array, int offset, int length) {
+        return DefaultImmutableBuffer.of(array, offset, length);
     }
 
     /**
@@ -38,6 +44,48 @@ public class ImmutableBufferTest extends AbstractBufferTest {
     public void testWrapInt() throws Exception {
         assertThat(Buffers.wrap(123).toString(), is("123"));
         assertThat(Buffers.wrap(-123).toString(), is("-123"));
+    }
+
+    @Test
+    public void testGoodBuffer() {
+        assertGoodBuffer(10, 3, 7);
+
+        // will be empty but is still allowed. Remember that
+        // the offset is zero based so 9 will be the last
+        // "good" index
+        assertGoodBuffer(10, 9, 0);
+
+        assertGoodBuffer(10, 0, 10);
+    }
+
+    @Test
+    public void testBadCreateBuffer() {
+        assertBadBuffer(10, 0, -1);
+        assertBadBuffer(10, -1, 4);
+        assertBadBuffer(10, 3, 11);
+    }
+
+    private static void assertGoodBuffer(final int size, final int offset, final int length) {
+        try {
+            final byte[] buf = new byte[size];
+            Buffer.of(buf, offset, length);
+        } catch (final IllegalArgumentException e) {
+            fail("Dit NOT expect the creation of the buffer to fail for a buffer of: "
+                    + size + ", an offset of " + offset + " and an length of: " + length);
+        }
+
+    }
+
+    private static void assertBadBuffer(final int size, final int offset, final int length) {
+        try {
+            final byte[] buf = new byte[size];
+            Buffer.of(buf, offset, length);
+            fail("Expected to fail with an IllegalArgumentException for a buffer of size "
+                    + size + " an offset of " + offset + " and a length of: " + length);
+        } catch (final IllegalArgumentException e) {
+            // expected
+        }
+
     }
 
 }
