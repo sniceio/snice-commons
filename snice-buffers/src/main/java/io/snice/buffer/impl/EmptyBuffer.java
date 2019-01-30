@@ -5,6 +5,9 @@ import io.snice.buffer.ByteNotFoundException;
 import io.snice.buffer.ReadableBuffer;
 import io.snice.buffer.WritableBuffer;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 public class EmptyBuffer implements ReadableBuffer {
 
     private static final String NOT_ENOUGH_READABLE_BYTES = "Not enough readable bytes";
@@ -85,6 +88,11 @@ public class EmptyBuffer implements ReadableBuffer {
     @Override
     public int indexOf(final int maxBytes, final byte... bytes) throws ByteNotFoundException, IllegalArgumentException {
         return -1;
+    }
+
+    @Override
+    public void writeTo(final OutputStream out) throws IOException {
+        // we're an empty buffer so nothing to write...
     }
 
     @Override

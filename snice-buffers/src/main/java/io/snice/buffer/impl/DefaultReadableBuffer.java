@@ -5,6 +5,8 @@ import io.snice.buffer.ByteNotFoundException;
 import io.snice.buffer.ReadableBuffer;
 import io.snice.buffer.WritableBuffer;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Objects;
 
 import static io.snice.preconditions.PreConditions.assertArgument;
@@ -16,7 +18,7 @@ public class DefaultReadableBuffer implements ReadableBuffer  {
         return new DefaultReadableBuffer(buf, 0);
     }
 
-    public static ReadableBuffer of(final byte[] buffer, int offset, int length) {
+    public static ReadableBuffer of(final byte[] buffer, final int offset, final int length) {
         final Buffer buf = DefaultImmutableBuffer.of(buffer, offset, length);
         return new DefaultReadableBuffer(buf, 0);
     }
@@ -341,6 +343,11 @@ public class DefaultReadableBuffer implements ReadableBuffer  {
     @Override
     public int indexOf(final int maxBytes, final byte... bytes) throws ByteNotFoundException, IllegalArgumentException {
         return buffer.indexOf(maxBytes, bytes);
+    }
+
+    @Override
+    public void writeTo(final OutputStream out) throws IOException {
+        buffer.slice(readerIndex, buffer.capacity()).writeTo(out);
     }
 
     @Override

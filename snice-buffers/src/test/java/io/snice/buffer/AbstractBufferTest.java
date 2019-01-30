@@ -2,6 +2,9 @@ package io.snice.buffer;
 
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
@@ -326,6 +329,20 @@ public abstract class AbstractBufferTest {
         assertThat(b1, is(not(b3)));
         assertThat(b1.hashCode(), is(not(b3.hashCode())));
         assertThat(b2, is(not(b3)));
+    }
+
+    @Test
+    public void testWriteToOutputStream() throws Exception {
+        ensureWriteToOutputStream("one two three");
+        ensureWriteToOutputStream("a"); // off by 1 bugs...
+        ensureWriteToOutputStream("");
+    }
+
+    private void ensureWriteToOutputStream(final String data) throws IOException  {
+        final Buffer b1 = createBuffer(data);
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        b1.writeTo(out);
+        assertThat(b1.toString(), is(out.toString()));
     }
 
 }

@@ -2,6 +2,9 @@ package io.snice.buffer;
 
 import io.snice.buffer.impl.DefaultImmutableBuffer;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 import static io.snice.preconditions.PreConditions.assertArray;
 
 /**
@@ -178,6 +181,40 @@ public interface Buffer {
      *             negative one will be returned instead.
      */
     int indexOf(int maxBytes, byte... bytes) throws ByteNotFoundException, IllegalArgumentException;
+
+    /**
+     * <p>
+     *     Write the content of this {@link Buffer} to the {@link OutputStream}.
+     * </p>
+     *
+     * <p>
+     *     For the default immutable {@link Buffer}, the result of this operation will always be
+     *     the same, i.e., the content will never change and as such, you will get the same result
+     *     every time. However, for the {@link ReadableBuffer} and, in particular, for the {@link WritableBuffer}, this
+     *     is not necessarily true since they both are mutable.
+     * </p>
+     *
+     * <p>
+     *     <b>{@link ReadableBuffer}:</b> for this buffer, every time you issue a <code>readXXX</code> you are
+     *     essentially consuming that data and in everything before it is discarded. Therefore, whenever you issue
+     *     a {@link #writeTo(OutputStream)} and in between those calls you have also done a few <code>readXXX</code>
+     *     operations, the amount of data written to the {@link OutputStream} will be less than last time.
+     *     This behaviour is also consistent with how {@link #toString()} works for the {@link ReadableBuffer}.
+     * </p>
+     *
+     * <p>
+     *     <b>{@link WritableBuffer}:</b> Since the writable buffer can add more data to the buffer, as well as
+     *     changing existing data "in the middle", it should not come as a surprise that multiple calls to
+     *     link {@link #writeTo(OutputStream)}} will likely yield different results. Also, since this buffer is
+     *     an extension to the {@link ReadableBuffer}, the beviour regarding reading also applies to this writable
+     *     buffer, which is of course consistent with how {@link #toString()} works for the {@link WritableBuffer}
+     *     as well.
+     * </p>
+     *
+     *
+     * @param out
+     */
+    void writeTo(OutputStream out) throws IOException;
 
     /**
      *
@@ -391,7 +428,9 @@ public interface Buffer {
      * <p>
      * Note, if the sub-class is a {@link ReadableBuffer} then depending
      * how much you have read, it will return only the available and readable bytes since as you keep
-     * reading from the underlying {@link ReadableBuffer}, those bytes will be discarded.
+     * reading from the underlying {@link ReadableBuffer}, those bytes will be discarded (or at least
+     * "hidden" - whether or not they are truly discarded and as such, purged from the heap, depends on the
+     * underlying implementation)
      * </p>
      * @return
      */

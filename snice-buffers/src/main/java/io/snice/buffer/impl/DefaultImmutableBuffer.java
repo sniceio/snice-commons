@@ -7,6 +7,8 @@ import io.snice.buffer.ReadableBuffer;
 import io.snice.buffer.WritableBuffer;
 import io.snice.preconditions.PreConditions;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
 import static io.snice.preconditions.PreConditions.assertArgument;
@@ -133,6 +135,12 @@ public class DefaultImmutableBuffer implements Buffer {
         }
 
         throw new ByteNotFoundException(capacity, bytes);
+    }
+
+    @Override
+    public void writeTo(final OutputStream out) throws IOException {
+        final int length = getReadableBytes();
+        out.write(buffer, lowerBoundary, length);
     }
 
     @Override

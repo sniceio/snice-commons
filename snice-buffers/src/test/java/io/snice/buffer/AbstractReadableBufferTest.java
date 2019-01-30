@@ -2,6 +2,8 @@ package io.snice.buffer;
 
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.function.Consumer;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -85,6 +87,55 @@ public abstract class AbstractReadableBufferTest extends AbstractBufferTest {
         ensureUnableToSetReaderIndex(buffer, -1);
         ensureUnableToSetReaderIndex(buffer, content.length() + 1);
     }
+
+    @Test
+    public void testWriteToOutputStreamAfterRead() throws Exception {
+        ensureWriteToOutputStream("one two three", 1);
+        ensureWriteToOutputStream("one two three", 3);
+        ensureWriteToOutputStream("a", 1); // off by 1 bugs...
+    }
+
+    private void ensureWriteToOutputStream(final String data, final int readNoOfBytes) throws IOException {
+        // first make sure that writing the entire data does indeed mean that all that
+        // data is written and that is what we get back as well...
+        final ReadableBuffer b1 = (ReadableBuffer)createBuffer(data);
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        b1.writeTo(out);
+        assertThat(b1.toString(), is(out.toString()));
+        assertThat(b1.toString(), is(data));
+
+        // now to the real test. If you then read from the buffer, the write to OutputStream
+        // should then NOT include the data that was read.
+        if (readNoOfBytes > 0) {
+            final Buffer slice = b1.readBytes(readNoOfBytes);
+            final String expected = data.substring(0, readNoOfBytes);
+            assertThat(slice.toString(), is(expected));
+
+            final ByteArrayOutputStream outAgain = new ByteArrayOutputStream();
+            b1.writeTo(outAgain);
+
+            final String whatsLeftExpected = data.substring(readNoOfBytes, data.length());
+            assertThat(b1.toString(), is(outAgain.toString()));
+            assertThat(b1.toString(), is(whatsLeftExpected));
+
+            // also then try a slice of the slice... assuming the slice has anything left to read from it.
+            final ReadableBuffer readableSlice = slice.toReadableBuffer();
+            if (readableSlice.hasReadableBytes()) {
+                readableSlice.readByte();
+                final ByteArrayOutputStream outAgain2 = new ByteArrayOutputStream();
+                readableSlice.writeTo(outAgain2);
+
+                // remember, we are operating on the first slice, which is the
+                // very first part of the original data...
+                final String whatsLeft2 = expected.substring(1);
+                assertThat(readableSlice.toString(), is(outAgain2.toString()));
+                assertThat(readableSlice.toString(), is(whatsLeft2));
+            }
+
+        }
+
+    }
+
 
     private static void ensureUnableToRead(final ReadableBuffer buffer, final Consumer<ReadableBuffer> fn) {
         try {
