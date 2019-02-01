@@ -4,6 +4,8 @@ import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
@@ -32,6 +34,19 @@ public abstract class AbstractBufferTest {
     public Buffer createBuffer(final String s) {
         return createBuffer(s.getBytes());
     }
+
+    @Test
+    public void testWrapLong() throws Exception {
+        assertThat(Buffers.wrap(123L).toString(), is("123"));
+        assertThat(Buffers.wrap(-123L).toString(), is("-123"));
+    }
+
+    @Test
+    public void testWrapInt() throws Exception {
+        assertThat(Buffers.wrap(123).toString(), is("123"));
+        assertThat(Buffers.wrap(-123).toString(), is("-123"));
+    }
+
 
     @Test
     public void testCreateWithOffsetAndLength() {
@@ -331,6 +346,30 @@ public abstract class AbstractBufferTest {
         assertThat(b2, is(not(b3)));
     }
 
+    /**
+     * A buffer can be parsed as an integer assuming there are no bad characters
+     * in there.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testParseAsInt() throws Exception {
+        assertParseAsInt("1234", 1234);
+        assertParseAsInt("-1234", -1234);
+        assertParseAsInt("0", 0);
+        assertParseAsInt("5060", 5060);
+
+        // negative tests
+        assertParseAsIntBadInput("apa");
+        assertParseAsIntBadInput("");
+        assertParseAsIntBadInput("-5 nope, everything needs to be digits");
+        assertParseAsIntBadInput("5 nope, everything needs to be digits");
+
+        // assertParseAsIntSliceFirst("hello:5060:asdf", 6, 10, 5060);
+        // assertParseAsIntSliceFirst("hello:-5:asdf", 6, 8, -5);
+    }
+
+
     @Test
     public void testWriteToOutputStream() throws Exception {
         ensureWriteToOutputStream("one two three");
@@ -338,11 +377,87 @@ public abstract class AbstractBufferTest {
         ensureWriteToOutputStream("");
     }
 
+    @Test
+    public void testMap() throws Exception {
+        final Buffer a = createBuffer("hello");
+        final Map<Buffer, String> map = new HashMap<Buffer, String>();
+        map.put(a, "fup");
+        assertThat(map.get(a), is("fup"));
+
+        final Buffer b = createBuffer("hello");
+        assertThat(map.get(b), is("fup"));
+
+        final Buffer c = createBuffer("world");
+        map.put(c, "apa");
+        assertThat(map.containsKey(c), is(true));
+
+        final Buffer d = createBuffer("nope");
+        assertThat(map.containsKey(d), is(false));
+    }
+
     private void ensureWriteToOutputStream(final String data) throws IOException  {
         final Buffer b1 = createBuffer(data);
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         b1.writeTo(out);
         assertThat(b1.toString(), is(out.toString()));
+    }
+
+    @Test
+    public void testStripEOL() throws Exception {
+        ensureStripEOL("no CRLF in this one", false, false);
+        ensureStripEOL("Just a CR here...\r", true, false);
+        ensureStripEOL("Just a LF in this one...\n", false, true);
+        ensureStripEOL("Alright, got both!\r\n", true, true);
+
+        ensureStripEOL("Note, this is not readUntilCRLF, this \r\n is strip so we should have the entire thing left", false, false);
+
+        // and ensure we don't have a +1 off bug resulting, usually, in blowing up
+        // in a spectacular way...
+        ensureStripEOL("", false, false);
+        ensureStripEOL("a", false, false);
+        ensureStripEOL("a\r", true, false);
+        ensureStripEOL("a\n", false, true);
+        ensureStripEOL("a\r\n", true, true);
+
+        ensureStripEOL("ab", false, false);
+        ensureStripEOL("ab\r", true, false);
+        ensureStripEOL("ab\n", false, true);
+        ensureStripEOL("ab\r\n", true, true);
+
+        ensureStripEOL("\r", true, false);
+        ensureStripEOL("\n", false, true);
+        ensureStripEOL("\r\n", true, true);
+    }
+
+    protected void ensureStripEOL(final String line, final boolean cr, final boolean lf) {
+        final Buffer buffer = createBuffer(line);
+        final Buffer stripped = buffer.stripEOL();
+
+        if (cr && lf) {
+            assertThat(buffer.capacity(), is(stripped.capacity() + 2));
+            assertThat(stripped.toString(), is(line.substring(0, line.length() - 2)));
+        } else if (cr || lf) {
+            assertThat(buffer.capacity(), is(stripped.capacity() + 1));
+            assertThat(stripped.toString(), is(line.substring(0, line.length() - 1)));
+        } else {
+            // neither so should be the exact same.
+            assertThat(buffer, is(stripped));
+        }
+    }
+
+    protected void assertParseAsInt(final String number, final int expectedNumber) throws NumberFormatException {
+        final Buffer buffer = createBuffer(number);
+        assertThat(buffer.parseToInt(), is(expectedNumber));
+    }
+
+    protected void assertParseAsIntBadInput(final String badNumber) {
+        try {
+            final Buffer buffer = createBuffer(badNumber);
+            buffer.parseToInt();
+            fail("Expected a NumberFormatException");
+        } catch (final NumberFormatException e) {
+            // expected
+        }
     }
 
 }

@@ -52,6 +52,20 @@ public interface ReadableBuffer extends Buffer {
      */
     long readUnsignedInt() throws IndexOutOfBoundsException;
 
+    @Override
+    default Buffer stripEOL() {
+        final int readableBytes = getReadableBytes();
+        if (readableBytes > 1 && endsWithCRLF()) {
+            return slice(getReaderIndex(), capacity() - 2);
+        }
+
+        if (readableBytes > 0 && (endsWith(LF) || endsWith(CR))) {
+            return slice(getReaderIndex(), capacity() - 1);
+        }
+
+        return this;
+    }
+
     /**
      * Read an int and will increase the reader index of this buffer by 4
      *

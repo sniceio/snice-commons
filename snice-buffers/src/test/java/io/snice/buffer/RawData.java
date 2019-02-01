@@ -3,9 +3,6 @@
  */
 package io.snice.buffer;
 
-import io.snice.buffer.old.Buffers;
-import io.snice.buffer.old.OldBuffer;
-
 /**
  * Simple place holder for a bunch of raw data used for testing purposes...
  * 
@@ -92,12 +89,11 @@ public final class RawData {
     /**
      * Default sip buffer containing a raw sip message
      */
-    public static OldBuffer sipBuffer;
+    public static Buffer sipBuffer;
 
     static {
-        final OldBuffer b = Buffers.wrap(RawData.rawEthernetFrame);
+        final Buffer b = Buffers.wrap(RawData.rawEthernetFrame);
         sipBuffer = b.slice(42, b.capacity());
-
     }
 
 }

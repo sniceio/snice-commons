@@ -143,10 +143,22 @@ public interface Buffer {
      * reader index is etc.
      * </p>
      *
+     * <p>
+     *     Also note that in the case of the {@link WritableBuffer}, the capacity is also not affected by
+     *     where the writer index is, however, it may be that there are bytes that yet has to have
+     *     anything written to them and as such, a portion of your {@link WritableBuffer} may be empty.
+     *     So, capacity essentially checks the underlying byte-array and how large it is. The
+     *     {@link ReadableBuffer#getReaderIndex()} is the mark for how far you have read into that
+     *     underlying byte-buffer and the {@link WritableBuffer#getWriterIndex()} keeps track of how
+     *     far into that byte-array you have written things into.
+     * </p>
+     * <p>
+     *     TODO: document the above with an image.
+     * </p>
+     *
      * @return the capacity
      */
     int capacity();
-
 
     /**
      * Same as {@link #indexOf(int, byte...)} but will return null instead of
@@ -160,10 +172,17 @@ public interface Buffer {
     int indexdOfSafe(int maxBytes, byte... bytes) throws IllegalArgumentException;
 
     /**
-     * Same as {@link #readUntil(int, byte...)} but instead of returning the
-     * buffer with everything up until the specified byte it returns the index
-     * instead.
      *
+     */
+    int indexOf(int maxBytes, byte... bytes) throws ByteNotFoundException, IllegalArgumentException;
+
+    /**
+     *
+     *
+     * @param startIndex where to start searching. Note that if the start index is out of
+     *                   bounds, i.e. less than zero or greater than the capacity of the
+     *                   buffer it will be silently ignored and -1 (negative one) will
+     *                   be returned to indicate we didn't find it.
      * @param maxBytes
      *            the maximum number of bytes we would like to read before
      *            giving up.
@@ -180,7 +199,30 @@ public interface Buffer {
      *             than maxBytes and we can't find what we are looking for then
      *             negative one will be returned instead.
      */
-    int indexOf(int maxBytes, byte... bytes) throws ByteNotFoundException, IllegalArgumentException;
+    int indexOf(int startIndex, int maxBytes, byte... bytes) throws ByteNotFoundException, IllegalArgumentException;
+
+    /**
+     * Search for the first occurrence of the specified byte and return it's index, or negative 1 if not found.
+     *
+     * Note that if this is a {@link ReadableBuffer} then the <code>readerIndex</code> dictates from where
+     * we start searching since everything that has been read so far is "consumed" and no longer in view.
+     * However, the index returned is based on the underlying buffer, hence, don't try and interpret the actual index
+     * too much and it really should only be used to a subsequent call to {@link #getByte(int)} etc.
+     *
+     * Perhaps this is slightly confusing but then again, we couldnt return an index that is based off of
+     * the reader index either since every read would then invalidate the previously returned <code>indexOf</code>
+     * results so that would make no sense and be even more confusing.
+     *
+     * @param b
+     * @return
+     * @throws ByteNotFoundException
+     *             will ONLY be thrown if we haven't found the byte within the
+     *             maxBytes limit. If the buffer we are searching in is less
+     *             than maxBytes and we can't find what we are looking for then
+     *             negative one will be returned instead.
+     * @throws IllegalArgumentException
+     */
+    int indexOf(byte b) throws ByteNotFoundException, IllegalArgumentException;
 
     /**
      * <p>
@@ -217,15 +259,6 @@ public interface Buffer {
     void writeTo(OutputStream out) throws IOException;
 
     /**
-     *
-     * @param b
-     * @return
-     * @throws ByteNotFoundException
-     * @throws IllegalArgumentException
-     */
-    int indexOf(byte b) throws ByteNotFoundException, IllegalArgumentException;
-
-    /**
      * Get a slice of the buffer starting at <code>start</code> (inclusive)
      * ending at <code>stop</code> (exclusive). Hence, the new capacity of the
      * new buffer is <code>stop - start</code>
@@ -254,7 +287,6 @@ public interface Buffer {
      * @return
      */
     Buffer slice();
-
 
     /**
      * Get the byte at the index.
@@ -285,10 +317,7 @@ public interface Buffer {
 
     int getUnsignedShort(int index) throws IndexOutOfBoundsException;
 
-
-
     short getUnsignedByte(int index) throws IndexOutOfBoundsException;
-
 
     /**
      * Parse all the readable bytes in this buffer as a unsigned integer value.
@@ -380,6 +409,43 @@ public interface Buffer {
 
     default boolean endsWithDoubleCRLF() {
         return endsWith(CR, LF, CR, LF);
+    }
+
+    /**
+     * <p>
+     *     If this {@link Buffer} ends with CR, LF or a single LF or a single CR it will
+     *     be stripped and a new (sliced) {@link Buffer} will be returned. If this {@link Buffer} does
+     *     not contain EOL, then <code>this</code> will be returned.
+     * </p>
+     *
+     * <p>
+     *     Note: this is not {@link ReadableBuffer#readLine()}, meaning that if this buffer has CR, LF or CRLF
+     *     somewhere in the middle of the buffer, they will not be stripped! Hence, the following would
+     *     be returned as is: <code>Buffers.wrap("I have CRLF in \r\n the middle").stripEOL()</code> would still
+     *     be the exact same content. Just compare with e.g. how usually <code>trim</code> functions works, only
+     *     removing whitespaces in the beginning and at the end, not the middle. Same same...
+     * </p>
+     *
+     * <p>
+     *     Also note that if this is a {@link ReadableBuffer} and you have read into this buffer, then you'll
+     *     only get what was still "visible". E.g., if you originally had the following {@link ReadableBuffer}:
+     *     <code>"This one ends with CRLF\r\n"</code> and you have read 5 bytes in like so
+     *     <code>buffer.readBytes(5)</code> then invoking {@link #stripEOL()} will return
+     *     <code>"one ends with CRLF"</code>
+     * </p>
+     *
+     * @return
+     */
+    default Buffer stripEOL() {
+        if (endsWithCRLF()) {
+            return slice(capacity() - 2);
+        }
+
+        if (endsWith(LF) || endsWith(CR)) {
+            return slice(capacity() - 1);
+        }
+
+        return this;
     }
 
     /**

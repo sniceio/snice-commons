@@ -12,6 +12,7 @@ public class EmptyBuffer implements ReadableBuffer {
 
     private static final String NOT_ENOUGH_READABLE_BYTES = "Not enough readable bytes";
     private static final String THIS_BUFFER_IS_EMPTY = "This buffer is empty";
+    private static final String NUMBER_FORMAT_ERROR = "This buffer is empty and therefore cannot be parsed as an integer";
 
     public static final Buffer EMPTY = new EmptyBuffer();
 
@@ -91,6 +92,11 @@ public class EmptyBuffer implements ReadableBuffer {
     }
 
     @Override
+    public int indexOf(final int startIndex, final int maxBytes, final byte... bytes) throws ByteNotFoundException, IllegalArgumentException, IndexOutOfBoundsException {
+        return -1;
+    }
+
+    @Override
     public void writeTo(final OutputStream out) throws IOException {
         // we're an empty buffer so nothing to write...
     }
@@ -153,12 +159,12 @@ public class EmptyBuffer implements ReadableBuffer {
 
     @Override
     public int parseToInt() throws NumberFormatException {
-        throw new IndexOutOfBoundsException(THIS_BUFFER_IS_EMPTY);
+        throw new NumberFormatException(NUMBER_FORMAT_ERROR);
     }
 
     @Override
-    public int parseToInt(final int radix) throws NumberFormatException {
-        throw new IndexOutOfBoundsException(THIS_BUFFER_IS_EMPTY);
+    public int parseToInt(final int radix) {
+        throw new NumberFormatException(NUMBER_FORMAT_ERROR);
     }
 
     @Override

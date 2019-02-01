@@ -2,8 +2,6 @@ package io.snice.buffer;
 
 import io.snice.buffer.impl.DefaultImmutableBuffer;
 import io.snice.buffer.impl.EmptyBuffer;
-import io.snice.buffer.old.OldBuffer;
-import io.snice.preconditions.PreConditions;
 
 import java.nio.charset.Charset;
 
@@ -38,6 +36,26 @@ public final class Buffers {
     private Buffers() {
         // left empty intentionally because this class should not be able
         // to be instantiated.
+    }
+
+    /**
+     * Wrap the supplied byte array specifying the allowed range of visible
+     * bytes.
+     *
+     * @param buffer
+     * @param lowerBoundary
+     *            the index of the lowest byte that is accessible to this OldBuffer
+     *            (zero based index)
+     * @param upperBoundary
+     *            the upper boundary (exclusive) of the range of visible bytes.
+     * @return
+     */
+    public static Buffer wrap(final byte[] buffer, final int lowerBoundary, final int upperBoundary) {
+        return Buffer.of(buffer, lowerBoundary, upperBoundary - lowerBoundary);
+    }
+
+    public static Buffer wrap(final byte[] buffer) {
+        return Buffer.of(buffer);
     }
 
     /**

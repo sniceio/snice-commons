@@ -211,7 +211,7 @@ public class DefaultReadableBuffer implements ReadableBuffer  {
 
     @Override
     public int getReadableBytes() {
-        return this.buffer.capacity() - this.readerIndex;
+        return buffer.capacity() - readerIndex;
     }
 
     @Override
@@ -337,22 +337,28 @@ public class DefaultReadableBuffer implements ReadableBuffer  {
 
     @Override
     public int indexdOfSafe(final int maxBytes, final byte... bytes) throws IllegalArgumentException {
-        return buffer.indexdOfSafe(maxBytes, bytes);
+        throw new RuntimeException("Not implemented just yet and will probably go away before 1.0");
     }
 
     @Override
     public int indexOf(final int maxBytes, final byte... bytes) throws ByteNotFoundException, IllegalArgumentException {
-        return buffer.indexOf(maxBytes, bytes);
+        return buffer.indexOf(readerIndex, maxBytes, bytes);
     }
 
     @Override
-    public void writeTo(final OutputStream out) throws IOException {
-        buffer.slice(readerIndex, buffer.capacity()).writeTo(out);
+    public int indexOf(final int startIndex, final int maxBytes, final byte... bytes) throws ByteNotFoundException, IllegalArgumentException, IndexOutOfBoundsException {
+        return buffer.indexOf(readerIndex, maxBytes, bytes);
     }
 
     @Override
     public int indexOf(final byte b) throws ByteNotFoundException, IllegalArgumentException {
-        return buffer.indexOf(b);
+        return buffer.indexOf(readerIndex, 4096, b);
+    }
+
+
+    @Override
+    public void writeTo(final OutputStream out) throws IOException {
+        sliceToSize().writeTo(out);
     }
 
     @Override
@@ -362,12 +368,12 @@ public class DefaultReadableBuffer implements ReadableBuffer  {
 
     @Override
     public Buffer slice(final int stop) {
-        return buffer.slice(stop);
+        return buffer.slice(readerIndex, stop);
     }
 
     @Override
     public Buffer slice() {
-        return buffer.slice();
+        return sliceToSize();
     }
 
     @Override
@@ -402,7 +408,7 @@ public class DefaultReadableBuffer implements ReadableBuffer  {
 
     @Override
     public int parseToInt() throws NumberFormatException {
-        return buffer.parseToInt();
+        return sliceToSize().parseToInt();
     }
 
     @Override
@@ -442,14 +448,29 @@ public class DefaultReadableBuffer implements ReadableBuffer  {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final DefaultReadableBuffer that = (DefaultReadableBuffer) o;
-        return Objects.equals(buffer, that.buffer);
+        if (this == o) {
+            return true;
+        }
+
+        try {
+            final Buffer me = sliceToSize();
+            if (o instanceof DefaultReadableBuffer) {
+                final Buffer that = ((DefaultReadableBuffer)o).sliceToSize();
+                return Objects.equals(me, that);
+            }
+
+            return Objects.equals(me, o);
+        } catch (final ClassCastException e) {
+            return false;
+        }
+    }
+
+    private Buffer sliceToSize() {
+        return buffer.slice(readerIndex, capacity());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(buffer);
+        return Objects.hash(sliceToSize());
     }
 }

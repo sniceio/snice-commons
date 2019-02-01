@@ -120,12 +120,17 @@ public class DefaultImmutableBuffer implements Buffer {
 
     @Override
     public int indexOf(final int maxBytes, final byte... bytes) throws ByteNotFoundException, IllegalArgumentException {
+        return indexOf(0, maxBytes, bytes);
+    }
+
+    @Override
+    public int indexOf(final int startIndex, final int maxBytes, final byte... bytes) throws ByteNotFoundException, IllegalArgumentException {
+        // checkIndex(startIndex);
         assertArgument(maxBytes > 0, "The max bytes must be at least 1");
         assertArgument(bytes.length > 0, "No bytes specified. Not sure what you want me to look for");
 
         final int capacity = capacity();
-        int index = 0;
-
+        int index = startIndex;
 
         while (hasReadableBytes() && (index < capacity) && (maxBytes > index)) {
             if (isByteInArray(getByte(index), bytes)) {
@@ -134,7 +139,11 @@ public class DefaultImmutableBuffer implements Buffer {
             ++index;
         }
 
-        throw new ByteNotFoundException(capacity, bytes);
+        if (index - startIndex >= maxBytes) {
+            throw new ByteNotFoundException(capacity, bytes);
+        }
+
+        return -1;
     }
 
     @Override
@@ -145,7 +154,7 @@ public class DefaultImmutableBuffer implements Buffer {
 
     @Override
     public int indexOf(final byte b) throws ByteNotFoundException, IllegalArgumentException {
-        return this.indexOf(4096, b);
+        return this.indexOf(0, 4096, b);
     }
 
     @Override
