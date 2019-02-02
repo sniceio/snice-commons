@@ -51,7 +51,7 @@ public interface Buffer {
         return (a & 0xff) << 24 | (b & 0xff) << 16 | (c & 0xff) << 8 | d & 0xff;
     }
 
-    static Buffer of(final byte[] buffer) {
+    static Buffer of(final byte... buffer) {
         assertArray(buffer);
         return DefaultImmutableBuffer.of(buffer);
     }

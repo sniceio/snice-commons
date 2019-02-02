@@ -54,7 +54,7 @@ public final class Buffers {
         return Buffer.of(buffer, lowerBoundary, upperBoundary - lowerBoundary);
     }
 
-    public static Buffer wrap(final byte[] buffer) {
+    public static Buffer wrap(final byte... buffer) {
         return Buffer.of(buffer);
     }
 
