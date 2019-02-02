@@ -273,7 +273,6 @@ public interface Buffer {
     Buffer slice(int start, int stop) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
-     * Same as {@link #slice(0, int)}
      *
      * @param stop
      * @return
@@ -402,6 +401,15 @@ public interface Buffer {
      * @return true if the this buffer indeed ends with the specified bytes, false otherwise.
      */
     boolean endsWith(final byte b1, final byte b2, final byte b3, final byte b4);
+
+    /**
+     * Check if this buffer ends with a single CR, a single LF or a CR directly followed by a LF.
+     *
+     * @return
+     */
+    default boolean endsWithEOL() {
+        return endsWith(CR) || endsWith(LF) || endsWithCRLF();
+    }
 
     default boolean endsWithCRLF() {
         return endsWith(CR, LF);

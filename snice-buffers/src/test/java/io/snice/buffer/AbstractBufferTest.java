@@ -122,6 +122,19 @@ public abstract class AbstractBufferTest {
         ensureEndsWith(slice01b, "d");
     }
 
+    @Test
+    public void testEndsWithEOL() {
+        assertThat(createBuffer("hello yes\n").endsWithEOL(), is(true));
+        assertThat(createBuffer("hello yes\r").endsWithEOL(), is(true));
+        assertThat(createBuffer("hello yes\r\n").endsWithEOL(), is(true));
+        assertThat(createBuffer("hello yes\r\n\n").endsWithEOL(), is(true));
+        assertThat(createBuffer("hello yes\r\n\n\r").endsWithEOL(), is(true));
+
+        assertThat(createBuffer("\n").endsWithEOL(), is(true));
+        assertThat(createBuffer("\r").endsWithEOL(), is(true));
+        assertThat(createBuffer("\r\n").endsWithEOL(), is(true));
+    }
+
     private static void ensureEndsWith(final Buffer buffer, final byte b) {
         assertThat(buffer.endsWith(b), is(true));
     }
