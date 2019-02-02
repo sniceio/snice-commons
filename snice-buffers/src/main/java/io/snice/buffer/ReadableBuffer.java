@@ -152,6 +152,37 @@ public interface ReadableBuffer extends Buffer {
     boolean hasReadableBytes();
 
     /**
+     * <p>
+     *     Read until a white space is found or if none is found, return <code>this</code>. All white space
+     *     will be consumed (if any is found).
+     * </p>
+     *
+     * <p>
+     * Details: Similar to that of {@link #readUntil(int, byte...)} but slightly different in that whereas the
+     * {@link #readUntil(int, byte...)} will stop at the first encounter with any of the specified bytes
+     * this method will read until the first white space and then consume it and any subsequent white space
+     * directly after the first one. Example:
+     * </p>
+     *
+     * <p>
+     * Example: <code>
+     *    Buffer buffer = Buffers.wrap("hello         world"); // many spaces...
+     *    Buffer hello = buffer.readUntilWhiteSpace();
+     *    System.out.println(hello);  // will contain "hello"
+     *    System.out.println(buffer); // will contain "world"
+     * </code>
+     * </p>
+     *
+     * <p>
+     * The {@link #readUntil(int, byte...)} would have stopped at the fist space and the remaining
+     * buffer (the "world" one) would have contained a bunch of spaces in the beginning...
+     * </p>
+     *
+     * @return
+     */
+    Buffer readUntilWhiteSpace();
+
+    /**
      * Same as {@link #readUntil(4096, 'b')}
      *
      * Read until the specified byte is encountered and return a buffer
@@ -172,7 +203,7 @@ public interface ReadableBuffer extends Buffer {
      *
      * As the example above illustrates, we are looking for a space, which is
      * found between "hello" and "world". Since the space will be consumed, the
-     * original buffer will now only contain "world" and not " world".
+     * original buffer will now only contain "world" and not " world" (notice the space)
      *
      * @param b
      *            the byte to look for

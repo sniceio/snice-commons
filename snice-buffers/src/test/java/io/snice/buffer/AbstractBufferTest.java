@@ -235,6 +235,109 @@ public abstract class AbstractBufferTest {
     }
 
     @Test
+    public void testCountWhiteSpace() throws Exception {
+        assertThat(createBuffer("").countWhiteSpace(), is(0));
+        assertThat(createBuffer(" ").countWhiteSpace(), is(1));
+        assertThat(createBuffer("\t").countWhiteSpace(), is(1));
+
+        assertThat(createBuffer(" \t").countWhiteSpace(), is(2));
+        assertThat(createBuffer("\t ").countWhiteSpace(), is(2));
+
+        assertThat(createBuffer("not until later \t ").countWhiteSpace(), is(0));
+        assertThat(createBuffer("nothing").countWhiteSpace(), is(0));
+
+        // slice and then count.
+        assertThat(createBuffer("hello world").slice(5, 10).countWhiteSpace(), is(1));
+        assertThat(createBuffer("hello  world").slice(5, 10).countWhiteSpace(), is(2));
+        assertThat(createBuffer("hello  \t\tworld").slice(5, 10).countWhiteSpace(), is(4));
+
+        // start counting from a different spot
+        assertThat(createBuffer("hello world").countWhiteSpace(5), is(1));
+        assertThat(createBuffer("hello world").countWhiteSpace(6), is(0));
+        assertThat(createBuffer("hello   world").countWhiteSpace(5), is(3));
+        assertThat(createBuffer("hello   world").countWhiteSpace(6), is(2)); // start one space in...
+    }
+
+    /**
+     * index of white space is just a convenience method but still
+     * better work!
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testIndexOfWhitespace() throws Exception {
+        final Buffer buffer = createBuffer("hello ena goa grejor");
+
+        final int index = buffer.indexOfWhiteSpace();
+        assertThat(index, is(5));
+        assertThat(buffer.getByte(index), is((byte)' '));
+
+        // slice out the first word and then the new
+        // index of white space should be 3 (zero index remember!)
+        final Buffer slice01 = buffer.slice(index + 1, buffer.capacity());
+        assertThat(slice01.indexOfWhiteSpace(), is(3));
+
+        // test to start later in the original buffer
+        assertThat(buffer.indexOfWhiteSpace(index + 1), is(9));
+        assertThat(buffer.slice(9).toString(), is("hello ena"));
+
+        // Also, if we slice and keep the white space then
+        // zero should be returned of course
+        assertThat(buffer.slice(index, buffer.capacity()).indexOfWhiteSpace(), is(0));
+
+        // and just make sure we catch HTAB as well
+        assertThat(createBuffer("hello\ttab").indexOfWhiteSpace(), is(5));
+        assertThat(createBuffer("hello\t tab and then space").indexOfWhiteSpace(), is(5));
+        assertThat(createBuffer("hello \tspace first then tab").indexOfWhiteSpace(), is(5));
+    }
+
+    /**
+     * The index is based off of the window of the slice so even if the underlying
+     * buffer is much larger, the index is still zero based from the beginning of the window.
+     *
+     * Ensure this is true so slice a bunch of times...
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testIndexOfAfterSlicing() throws Exception {
+        final Buffer buffer = createBuffer("hello world ena goa grejor");
+        final Buffer hello = buffer.slice(5);
+        assertThat(hello.indexOf((byte)'h'), is(0));
+        assertThat(hello.indexOf((byte)'e'), is(1));
+        assertThat(hello.indexOf((byte)'l'), is(2)); // skip the second 'l' because we would find the first again
+        assertThat(hello.indexOf((byte)'o'), is(4));
+        assertThat(hello.indexOf((byte)' '), is(-1)); // outside of our window
+        assertThat(hello.indexOf((byte)'w'), is(-1)); // outside of our window
+
+        // also, index of white space should also be -1,
+        // which really should be exactly the same as searching for
+        // space but just in case we fat-finger something at some point
+        assertThat(hello.indexOfWhiteSpace(), is(-1));
+
+        // slice further in...
+        final Buffer world = buffer.slice(6, 6 + 5);
+        assertThat(world.indexOf((byte)'w'), is(0));
+        assertThat(world.indexOf((byte)'o'), is(1));
+        assertThat(world.indexOf((byte)'r'), is(2));
+        assertThat(world.indexOf((byte)'l'), is(3));
+        assertThat(world.indexOf((byte)'d'), is(4));
+
+        assertThat(world.indexOf((byte)'h'), is(-1)); // outside of our window
+        assertThat(world.indexOf((byte)' '), is(-1)); // outside of our window
+
+        // and as always, check boundaries at the end as well.
+        // btw, 'grejor' means stuff in swedish... in case you wondered...
+        final Buffer grejor = buffer.slice(20, buffer.capacity());
+        assertThat(grejor.indexOf((byte)'g'), is(0));
+        assertThat(grejor.indexOf((byte)'r'), is(1));
+        assertThat(grejor.indexOf((byte)'e'), is(2));
+        assertThat(grejor.indexOf((byte)'j'), is(3));
+        assertThat(grejor.indexOf((byte)'o'), is(4));
+        assertThat(grejor.indexOf(2, 100, (byte)'r'), is(5)); // skip passed the first 'r'
+    }
+
+    @Test
     public void testSlicing() throws Exception {
         final Buffer orig = createBuffer("hello world ena goa grejor");
 

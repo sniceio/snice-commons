@@ -39,6 +39,20 @@ public class DefaultImmutableBuffer implements Buffer {
         return new DefaultImmutableBuffer(buffer, offset, offset + length);
     }
 
+    @Override
+    public int countWhiteSpace(final int startIndex) {
+        checkIndex(lowerBoundary + startIndex);
+        int count = 0;
+        for (int i = lowerBoundary + startIndex; i < upperBoundary; ++i) {
+            if (buffer[i] != SP && buffer[i] != HTAB) {
+                break;
+            }
+            ++count;
+        }
+
+        return count;
+    }
+
     /**
      * The actual buffer
      */
@@ -111,6 +125,7 @@ public class DefaultImmutableBuffer implements Buffer {
         return upperBoundary - lowerBoundary;
     }
 
+
     public static boolean hasReadableBytes() {
         // when creating this buffer we will check if the passed in
         // array is empty and if so, we'll actually return an empty buffer
@@ -125,14 +140,17 @@ public class DefaultImmutableBuffer implements Buffer {
 
     @Override
     public int indexOf(final int startIndex, final int maxBytes, final byte... bytes) throws ByteNotFoundException, IllegalArgumentException {
-        // checkIndex(startIndex);
+        checkIndex(lowerBoundary + startIndex);
         assertArgument(maxBytes > 0, "The max bytes must be at least 1");
         assertArgument(bytes.length > 0, "No bytes specified. Not sure what you want me to look for");
 
         final int capacity = capacity();
+        // remember that the start index is zero based off of the lower boundary.
+        // however, the getByte method takes this into account, which is why
+        // we don't do it here.
         int index = startIndex;
 
-        while (hasReadableBytes() && (index < capacity) && (maxBytes > index)) {
+        while ((index < capacity) && (maxBytes > index)) {
             if (isByteInArray(getByte(index), bytes)) {
                 return index;
             }
@@ -154,7 +172,7 @@ public class DefaultImmutableBuffer implements Buffer {
 
     @Override
     public int indexOf(final byte b) throws ByteNotFoundException, IllegalArgumentException {
-        return this.indexOf(0, 4096, b);
+        return indexOf(0, 4096, b);
     }
 
     @Override

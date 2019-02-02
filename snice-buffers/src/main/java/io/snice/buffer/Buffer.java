@@ -14,8 +14,23 @@ import static io.snice.preconditions.PreConditions.assertNotNull;
  * </p>
  *
  * <p>
- * Yes, yet another {@link Buffer} class, as we didn't have enough!
- * <br/>
+ * The main purpose of this {@link Buffer} class is to provide a thread safe buffer that
+ * supports a variety of operations commonly used when working with framers/parsers.
+ * Common operations that one may run into in those situations is scanning until
+ * you find a certain byte, or sequence of bytes ({@link #indexOf(int, int, byte...)}, ability
+ * to {@link #slice()} off areas of the buffer and treat them as independent buffers (yet thread safe and cheap
+ * because no underlying byte-array is copied) and just in general helping out with working
+ * with byte-arrays.
+ * </p>
+ *
+ * <p>
+ *     Of course, since this {@link Buffer} is immutable all operations herein are of the type
+ *     "find the index of x" but if you want to keep track of your read progress, which is typical
+ *     when building parsers and framers, then you don't want to keep track of the read index yourself
+ *     so in that case, use the {@link ReadableBuffer} instead.
+ * </p>
+ *
+ * <p>
  * This follows somewhat the pattern of the Netty buffers but they are not as standalone
  * as I'd like. Also, if you do work with a lot of byte-arrays, you kind of want to wrap
  * them into something a little more usable.
@@ -23,8 +38,54 @@ import static io.snice.preconditions.PreConditions.assertNotNull;
  */
 public interface Buffer {
 
-    byte LF = '\n';
+    byte AT = '@';
+    byte COLON = ':';
+    byte SEMI = ';';
+    byte DOUBLE_QOUTE = '"';
     byte CR = '\r';
+    byte LF = '\n';
+    byte SP = ' ';
+    byte HTAB = '\t';
+    byte DASH = '-';
+    byte PERIOD = '.';
+    byte COMMA = ',';
+    byte EXCLAMATIONPOINT = '!';
+    byte PERCENT = '%';
+    byte STAR = '*';
+    byte UNDERSCORE = '_';
+    byte QUESTIONMARK = '?';
+    byte PLUS = '+';
+    byte BACKTICK = '`';
+    byte TICK = '\'';
+    byte TILDE = '~';
+    byte EQ = '=';
+    byte SLASH = '/';
+    byte BACK_SLASH = '\\';
+
+    /**
+     * Left parenthesis
+     */
+    byte LPAREN = '(';
+
+    /**
+     * Right parenthesis
+     */
+    byte RPAREN = ')';
+
+    /**
+     * Right angle quote
+     */
+    byte RAQUOT = '>';
+
+    /**
+     * Left angle quote
+     */
+    byte LAQUOT = '<';
+
+    /**
+     * Double quotation mark
+     */
+    byte DQUOT = '"';
 
     /**
      * Helper method to "parse" out a unsigned int from the given 4 bytes.
@@ -59,6 +120,61 @@ public interface Buffer {
 
     static Buffer of(final byte[] buffer, final int offset, final int length) {
         return DefaultImmutableBuffer.of(buffer, offset, length);
+    }
+
+    /**
+     * Helper method for checking whether the supplied byte is a alphanumeric
+     * character or not.
+     *
+     * @param ch
+     * @return true if the byte is indeed a alphanumeric character, false
+     *         otherwise
+     */
+    static boolean isAlphaNum(final char ch) {
+        return ch >= 97 && ch <= 122 || ch >= 48 && ch <= 57 || ch >= 65 && ch <= 90;
+    }
+
+    static boolean isAlphaNum(final byte b) {
+        return isAlphaNum((char) b);
+    }
+
+    /**
+     * Find the (next) index of white space, which is defined as {@link #SP} or a {@link #HTAB}.
+     *
+     * This is a convenience method for just doing a {@link #indexOf(int, int, byte...)}.
+     *
+     * @param startIndex start (inclusive) searching from this point in buffer.
+     * @return the index of where the next {@link #SP} or {@link #HTAB} is found or -1 (negative one)
+     * if none is found.
+     */
+    default int indexOfWhiteSpace(final int startIndex) throws ByteNotFoundException, IllegalArgumentException {
+        return indexOf(startIndex, 4096, SP, HTAB);
+    }
+
+    /**
+     * Same as {@link #indexOfWhiteSpace(int)} with a start index of zero
+     *
+     * @return
+     */
+     default int indexOfWhiteSpace() throws ByteNotFoundException, IllegalArgumentException {
+         return indexOfWhiteSpace(0);
+     }
+
+    /**
+     * Count all the consecutive white space starting with the supplied index. If the start index
+     * itself isn't a white space ({@link #SP} or {@link #HTAB} then zero will be returned.
+     *
+     * @param startIndex start counting from here (inclusive)
+     * @return the number of consecutive white spaces found starting at the supplied index.
+     * Zero if none is found.
+     */
+     int countWhiteSpace(int startIndex);
+
+    /**
+     * This is the same as {@link #countWhiteSpace(int)} with a start index of zero
+     */
+    default int countWhiteSpace() {
+        return countWhiteSpace(0);
     }
 
     /**
@@ -347,11 +463,9 @@ public interface Buffer {
      */
     int getInt(int index) throws IndexOutOfBoundsException;
 
-
     long getUnsignedInt(int index) throws IndexOutOfBoundsException;
 
     short getShort(int index) throws IndexOutOfBoundsException;
-
 
     int getUnsignedShort(int index) throws IndexOutOfBoundsException;
 

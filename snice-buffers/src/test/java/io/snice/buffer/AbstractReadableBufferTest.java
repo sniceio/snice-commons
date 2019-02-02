@@ -27,6 +27,28 @@ public abstract class AbstractReadableBufferTest extends AbstractBufferTest {
         return (ReadableBuffer)createBuffer(bytes);
     }
 
+    @Test
+    public void testReadUntilWhiteSpace() throws Exception {
+        ensureReadUntilWhiteSpace("hello world", "hello", "world");
+        ensureReadUntilWhiteSpace("hello\tworld", "hello", "world");
+
+        // doesn't matter how many spaces there is, should all be consumed
+        ensureReadUntilWhiteSpace("hello      world", "hello", "world");
+        ensureReadUntilWhiteSpace("hello   \t\t   world", "hello", "world");
+
+        // should only consume up until the first one...
+        // but next read we'll get the final split
+        final ReadableBuffer buf = ensureReadUntilWhiteSpace("hello      world again", "hello", "world again");
+        assertThat(buf.readUntilWhiteSpace().toString(), is("world"));
+        assertThat(buf.toString(), is("again"));
+    }
+
+    private ReadableBuffer ensureReadUntilWhiteSpace(final String line, final String expected1, final String expected2) {
+        final ReadableBuffer buffer = createReadableBuffer(line);
+        assertThat(buffer.readUntilWhiteSpace().toString(), is(expected1));
+        assertThat(buffer.toString(), is(expected2));
+        return buffer;
+    }
     /**
      * Make sure that we can read the single-crlf sequence correctly.
      *

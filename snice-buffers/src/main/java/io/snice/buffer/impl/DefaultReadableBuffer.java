@@ -23,6 +23,11 @@ public class DefaultReadableBuffer implements ReadableBuffer  {
         return new DefaultReadableBuffer(buf, 0);
     }
 
+    @Override
+    public int countWhiteSpace(final int startIndex) {
+        return buffer.countWhiteSpace(startIndex);
+    }
+
     public static ReadableBuffer of(final Buffer buffer) {
         return new DefaultReadableBuffer(buffer.toBuffer(), 0);
     }
@@ -215,6 +220,20 @@ public class DefaultReadableBuffer implements ReadableBuffer  {
     }
 
     @Override
+    public Buffer readUntilWhiteSpace() {
+        final int index = buffer.indexOfWhiteSpace(readerIndex);
+        if (index == -1) {
+            return this;
+        }
+
+        final int count = buffer.countWhiteSpace(index);
+        final Buffer slice = slice(index);
+        readerIndex = index + count;
+        return slice;
+    }
+
+
+    @Override
     public Buffer readUntil(final byte b) throws ByteNotFoundException {
         return readUntil(4096, b);
     }
@@ -347,7 +366,7 @@ public class DefaultReadableBuffer implements ReadableBuffer  {
 
     @Override
     public int indexOf(final int startIndex, final int maxBytes, final byte... bytes) throws ByteNotFoundException, IllegalArgumentException, IndexOutOfBoundsException {
-        return buffer.indexOf(readerIndex, maxBytes, bytes);
+        return buffer.indexOf(startIndex, maxBytes, bytes);
     }
 
     @Override

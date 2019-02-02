@@ -24,6 +24,21 @@ public class EmptyBuffer implements ReadableBuffer {
     }
 
     @Override
+    public int indexOfWhiteSpace(final int startIndex) {
+        return -1;
+    }
+
+    @Override
+    public int indexOfWhiteSpace() {
+        return -1;
+    }
+
+    @Override
+    public int countWhiteSpace(final int startIndex) {
+        return 0;
+    }
+
+    @Override
     public Buffer toBuffer() {
         return this;
     }
@@ -257,6 +272,11 @@ public class EmptyBuffer implements ReadableBuffer {
     @Override
     public boolean hasReadableBytes() {
         return false;
+    }
+
+    @Override
+    public Buffer readUntilWhiteSpace() {
+        throw new IndexOutOfBoundsException(NOT_ENOUGH_READABLE_BYTES);
     }
 
     @Override
