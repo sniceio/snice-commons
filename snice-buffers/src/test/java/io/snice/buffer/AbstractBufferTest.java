@@ -135,6 +135,48 @@ public abstract class AbstractBufferTest {
         assertThat(createBuffer("\r\n").endsWithEOL(), is(true));
     }
 
+    @Test
+    public void testStartsWith() {
+        assertThat(createBuffer("hello world").startsWith(createBuffer("hello")), is(true));
+        assertThat(createBuffer("hello world").startsWith(createBuffer("hello world this is too long")), is(false));
+
+        // testing for 1-off errors...
+        assertThat(createBuffer("hello world").startsWith(createBuffer("hello worl")), is(true));
+        assertThat(createBuffer("hello world").startsWith(createBuffer("hello world")), is(true));
+        assertThat(createBuffer("hello world").startsWith(createBuffer("hello world!")), is(false));
+
+        // other 1-off error types...
+        assertThat(createBuffer("").startsWith(createBuffer("nope")), is(false));
+        assertThat(createBuffer("").startsWith(createBuffer("")), is(true));
+        assertThat(createBuffer("empty should match I guess").startsWith(createBuffer("")), is(true));
+
+        // do some slicing
+        final String s = "hello world";
+        assertThat(createBuffer(s).slice(6, s.length()).startsWith(createBuffer("world")), is(true));
+        assertThat(createBuffer(s).slice(6, s.length()).startsWith(createBuffer(s).slice(6, 7)), is(true));
+    }
+
+    @Test
+    public void testStartsWithIgnoreCase() {
+        assertThat(createBuffer("hello world").startsWithIgnoreCase(createBuffer("heLlO")), is(true));
+        assertThat(createBuffer("hello world").startsWithIgnoreCase(createBuffer("hello world this is too long")), is(false));
+
+        // testing for 1-off errors...
+        assertThat(createBuffer("hello World").startsWithIgnoreCase(createBuffer("hello worl")), is(true));
+        assertThat(createBuffer("hello World").startsWithIgnoreCase(createBuffer("hello world")), is(true));
+        assertThat(createBuffer("hello World").startsWithIgnoreCase(createBuffer("hello world!")), is(false));
+
+        // other 1-off error types...
+        assertThat(createBuffer("").startsWithIgnoreCase(createBuffer("nope")), is(false));
+        assertThat(createBuffer("").startsWithIgnoreCase(createBuffer("")), is(true));
+        assertThat(createBuffer("empty should match I guess").startsWithIgnoreCase(createBuffer("")), is(true));
+
+        // do some slicing
+        final String s = "hello world";
+        assertThat(createBuffer(s.toUpperCase()).slice(6, s.length()).startsWithIgnoreCase(createBuffer("world")), is(true));
+        assertThat(createBuffer(s.toUpperCase()).slice(6, s.length()).startsWithIgnoreCase(createBuffer(s).slice(6, 7)), is(true));
+    }
+
     private static void ensureEndsWith(final Buffer buffer, final byte b) {
         assertThat(buffer.endsWith(b), is(true));
     }
@@ -295,6 +337,14 @@ public abstract class AbstractBufferTest {
         assertBufferEquality("hello world", "world", false);
         assertBufferEquality("Hello", "hello", false);
         assertBufferEquality("h", "h", true);
+    }
+
+    @Test
+    public void testEqualsAfterSlice() throws Exception {
+        final Buffer b1 = createBuffer("hello world");
+        final Buffer b2 = createBuffer("hello");
+        assertThat(b1.slice(b2.capacity()), is(b2));
+        assertThat(b1.slice(b2.capacity()).equals(b2), is(true));
     }
 
     @Test

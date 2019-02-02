@@ -334,12 +334,30 @@ public class DefaultImmutableBuffer implements Buffer {
         return internalEquals(false, other);
     }
 
+    /**
+     * Due to the decision to not implement the default buffer vs the readable version using
+     * inheritance but rather through delegation we end up in some unfortunate situations like
+     * the one below. Perhaps I should have stuck with inheritance instead even though I do think
+     * it overall may potentially, possibly maybe be a more robust solution by doing it through
+     * delegation... but I may be wrong...
+     *
+     * @param other
+     * @return
+     */
+    private static DefaultImmutableBuffer ensureBuffer(final Object other) throws ClassCastException {
+        // if this is already an immutable buffer, as opposed to a readable etc, then this is cheap.
+        // if it isn't, for a readable buffer it is cheap as well, for a writable, it will force us
+        // to make a clone of the underlying byte-array...
+        final Buffer buffer = (Buffer)other;
+        return (DefaultImmutableBuffer)buffer.toBuffer();
+    }
+
     private boolean internalEquals(final boolean ignoreCase, final Object other) {
         try {
             if (this == other) {
                 return true;
             }
-            final DefaultImmutableBuffer b = (DefaultImmutableBuffer) other;
+            final DefaultImmutableBuffer b = ensureBuffer(other);
             if (getReadableBytes() != b.getReadableBytes()) {
                 return false;
             }

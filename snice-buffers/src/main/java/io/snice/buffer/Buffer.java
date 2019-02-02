@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import static io.snice.preconditions.PreConditions.assertArray;
+import static io.snice.preconditions.PreConditions.assertNotNull;
 
 /**
  * <p>
@@ -132,6 +133,44 @@ public interface Buffer {
      * @return
      */
     boolean isEmpty();
+
+    /**
+     * Test to see if this buffer starts with the <code>other</code> buffer.
+     *
+     * If the <code>other</code> is an empty buffer, true will be returned, which is consistent with how
+     * {@link String#startsWith(String)} behaves as well.
+     *
+     * @param other
+     * @return
+     * @throws IllegalArgumentException in case <code>other</code> is null
+     */
+    default boolean startsWith(final Buffer other) throws IllegalArgumentException{
+        assertNotNull(other, "The other buffer cannot be null");
+        if (other.isEmpty()) {
+            return true;
+        }
+
+        if (other.capacity() > this.capacity()) {
+            return false;
+        }
+
+        final Buffer slice = slice(other.capacity());
+        return slice.equals(other);
+    }
+
+    default boolean startsWithIgnoreCase(final Buffer other) {
+        assertNotNull(other, "The other buffer cannot be null");
+        if (other.isEmpty()) {
+            return true;
+        }
+
+        if (other.capacity() > this.capacity()) {
+            return false;
+        }
+
+        final Buffer slice = slice(other.capacity());
+        return slice.equalsIgnoreCase(other);
+    }
 
     /**
      * <p>

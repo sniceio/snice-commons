@@ -8,6 +8,8 @@ import io.snice.buffer.WritableBuffer;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import static io.snice.preconditions.PreConditions.assertNotNull;
+
 public class EmptyBuffer implements ReadableBuffer {
 
     private static final String NOT_ENOUGH_READABLE_BYTES = "Not enough readable bytes";
@@ -49,6 +51,18 @@ public class EmptyBuffer implements ReadableBuffer {
     @Override
     public boolean endsWith(final byte b1, final byte b2, final byte b3, final byte b4) {
         return false;
+    }
+
+    @Override
+    public boolean startsWith(final Buffer other) throws IllegalArgumentException{
+        assertNotNull(other, "The other buffer cannot be null");
+        return other.isEmpty();
+    }
+
+    @Override
+    public boolean startsWithIgnoreCase(final Buffer other) {
+        assertNotNull(other, "The other buffer cannot be null");
+        return other.isEmpty();
     }
 
     @Override
