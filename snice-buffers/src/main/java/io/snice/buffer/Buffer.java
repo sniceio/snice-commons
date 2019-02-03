@@ -182,6 +182,10 @@ public interface Buffer {
      * already is a {@link Buffer} this will simply return this. If this is of type {@link ReadableBuffer} or
      * a {@link WritableBuffer} then these will be converted into a immutable version (so the base {@link Buffer});
      *
+     * Also note that in the case of the {@link ReadableBuffer}, any bytes that have been consumed by reading
+     * passed them will not be part of the returned {@link Buffer}. After all, any bytes that have been read
+     * may in fact have been discarded.
+     *
      * @return
      */
     Buffer toBuffer();

@@ -315,7 +315,7 @@ public class DefaultReadableBuffer implements ReadableBuffer  {
 
     @Override
     public Buffer toBuffer() {
-        return buffer;
+        return sliceToSize();
     }
 
     @Override

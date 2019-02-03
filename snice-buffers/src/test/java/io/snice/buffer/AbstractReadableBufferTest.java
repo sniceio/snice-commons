@@ -788,6 +788,20 @@ public abstract class AbstractReadableBufferTest extends AbstractBufferTest {
         assertBuffers(sliceClone, slice);
     }
 
+    /**
+     * For a readable buffer, when to we do {@link Buffer#toBuffer()} any bytes that have been
+     * consumed by reading past them should not be included in the new of the {@link Buffer} that
+     * is returned.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testToBuffer() throws Exception {
+        final ReadableBuffer buffer = createReadableBuffer("hello world");
+        buffer.readUntilWhiteSpace();
+        assertThat(buffer.toBuffer().toString(), is("world"));
+    }
+
     private static void assertBuffers(final Buffer b1, final Buffer b2) throws Exception {
         // make sure they are the exact same size and have
         // the same content etc
