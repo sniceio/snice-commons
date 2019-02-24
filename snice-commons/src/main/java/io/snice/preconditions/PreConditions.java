@@ -31,6 +31,22 @@ public final class PreConditions {
     // ----------------------------------------------------------------------
     // ----------------------------------------------------------------------
 
+    /**
+     * Ensure that the reference is indeed null.
+     *
+     * @return
+     * @throws IllegalArgumentException in case the value isn't null
+     */
+    public static <T> void assertNull(final T reference, final String msg) throws IllegalArgumentException {
+        if (reference != null) {
+            throw new IllegalArgumentException(msg);
+        }
+    }
+
+    public static <T> void assertNull(final T reference) throws IllegalArgumentException {
+        assertNull(reference, "Value must be null");
+    }
+
     public static <T> T assertNotNull(final T reference, final String msg) throws IllegalArgumentException {
         if (reference == null) {
             throw new IllegalArgumentException(msg);
@@ -39,10 +55,7 @@ public final class PreConditions {
     }
 
     public static <T> T assertNotNull(final T reference) throws IllegalArgumentException {
-        if (reference == null) {
-            throw new IllegalArgumentException("Value cannot be null");
-        }
-        return reference;
+        return assertNotNull(reference, "Value cannot be null");
     }
 
     public static String assertNotEmpty(final String reference, final String msg) throws IllegalArgumentException {

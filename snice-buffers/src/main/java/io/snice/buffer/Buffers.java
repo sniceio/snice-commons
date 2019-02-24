@@ -4,6 +4,8 @@ import io.snice.buffer.impl.DefaultImmutableBuffer;
 import io.snice.buffer.impl.EmptyBuffer;
 
 import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.List;
 
 import static io.snice.preconditions.PreConditions.assertNotNull;
 
@@ -58,6 +60,29 @@ public final class Buffers {
         return Buffer.of(buffer);
     }
 
+    public static Buffer wrap(final Buffer... buffers) {
+        assertNotNull(buffers == null || buffers.length == 0, "You must specify at least one buffer");
+        return Buffers.wrap(Arrays.asList(buffers));
+
+    }
+
+    public static Buffer wrap(final List<Buffer> buffers) {
+        if (buffers == null || buffers.isEmpty()) {
+            return EmptyBuffer.EMPTY;
+        }
+
+        // TODO: create a proper composite buffer
+        final int size = (int)buffers.stream().mapToInt(Buffer::capacity).sum();
+        final byte[] buffer = new byte[size];
+        int index = 0;
+        for (final Buffer b : buffers) {
+            for (int i = 0; i < b.capacity(); ++i) {
+                buffer[index++] = b.getByte(i);
+            }
+        };
+
+        return Buffers.wrap(buffer);
+    }
     /**
      * Converts the integer value into a string and that is what is being
      * wrapped in a {@link Buffer}

@@ -595,6 +595,32 @@ public abstract class AbstractBufferTest {
         ensureStripEOL("\r\n", true, true);
     }
 
+    @Test
+    public void testComposeBuffers() {
+        final Buffer hello = createBuffer("hello");
+        final Buffer space = createBuffer(" ");
+        final Buffer world = createBuffer("world");
+
+        final Buffer helloWorld = Buffers.wrap(hello, space, world);
+        assertThat(helloWorld.toString(), is("hello world"));
+
+        // should be fine to slice
+        assertThat(helloWorld.slice(3, 8).toString(), is("lo wo"));
+
+        // and we shouldn't "notice" the boundaries of course...
+        assertThat(helloWorld.getByte(0), is((byte)'h'));
+        assertThat(helloWorld.getByte(1), is((byte)'e'));
+        assertThat(helloWorld.getByte(2), is((byte)'l'));
+        assertThat(helloWorld.getByte(3), is((byte)'l'));
+        assertThat(helloWorld.getByte(4), is((byte)'o'));
+        assertThat(helloWorld.getByte(5), is((byte)' '));
+        assertThat(helloWorld.getByte(6), is((byte)'w'));
+        assertThat(helloWorld.getByte(7), is((byte)'o'));
+        assertThat(helloWorld.getByte(8), is((byte)'r'));
+        assertThat(helloWorld.getByte(9), is((byte)'l'));
+        assertThat(helloWorld.getByte(10), is((byte)'d'));
+    }
+
     protected void ensureStripEOL(final String line, final boolean cr, final boolean lf) {
         final Buffer buffer = createBuffer(line);
         final Buffer stripped = buffer.stripEOL();
