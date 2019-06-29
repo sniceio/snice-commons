@@ -113,6 +113,18 @@ public interface Buffer {
         return (a & 0xff) << 24 | (b & 0xff) << 16 | (c & 0xff) << 8 | d & 0xff;
     }
 
+    /**
+     * Helper method to "parse" out a signed int from the given 3 bytes.
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
+    static int signedInt(final byte a, final byte b, final byte c) {
+        return (a & 0xff) << 16 | (b & 0xff) << 8 | c & 0xff;
+    }
+
     static Buffer of(final byte... buffer) {
         assertArray(buffer);
         return DefaultImmutableBuffer.of(buffer);
@@ -466,6 +478,16 @@ public interface Buffer {
      *             in case there is not 4 bytes left to read
      */
     int getInt(int index) throws IndexOutOfBoundsException;
+
+    /**
+     * Somewhat of an odd method but there are times when you need to parse out
+     * three octets as an int, as opposed to the normal 4.
+     *
+     * @param index
+     * @return
+     * @throws IndexOutOfBoundsException
+     */
+    int getIntFromThreeOctets(int index) throws IndexOutOfBoundsException;
 
     long getUnsignedInt(int index) throws IndexOutOfBoundsException;
 

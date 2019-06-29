@@ -406,6 +406,11 @@ public class DefaultReadableBuffer implements ReadableBuffer  {
     }
 
     @Override
+    public int getIntFromThreeOctets(int index) throws IndexOutOfBoundsException {
+        return buffer.getIntFromThreeOctets(index);
+    }
+
+    @Override
     public long getUnsignedInt(final int index) throws IndexOutOfBoundsException {
         return buffer.getUnsignedInt(index);
     }

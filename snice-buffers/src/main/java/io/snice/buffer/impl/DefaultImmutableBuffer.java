@@ -214,6 +214,14 @@ public class DefaultImmutableBuffer implements Buffer {
     }
 
     @Override
+    public int getIntFromThreeOctets(int index) throws IndexOutOfBoundsException {
+        final int i = lowerBoundary + index;
+        checkIndex(i);
+        checkIndex(i + 2);
+        return Buffer.signedInt(buffer[i], buffer[i + 1], buffer[i + 2]);
+    }
+
+    @Override
     public long getUnsignedInt(final int index) throws IndexOutOfBoundsException {
         final int i = lowerBoundary + index;
         checkIndex(i);

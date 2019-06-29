@@ -166,6 +166,10 @@ public class EmptyBuffer implements ReadableBuffer {
         throw new IndexOutOfBoundsException(THIS_BUFFER_IS_EMPTY);
     }
 
+    public int getIntFromThreeOctets(int index) throws IndexOutOfBoundsException {
+        throw new IndexOutOfBoundsException(THIS_BUFFER_IS_EMPTY);
+    }
+
     @Override
     public long getUnsignedInt(final int index) throws IndexOutOfBoundsException {
         throw new IndexOutOfBoundsException(THIS_BUFFER_IS_EMPTY);
