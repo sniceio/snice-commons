@@ -58,6 +58,17 @@ public final class PreConditions {
         return assertNotNull(reference, "Value cannot be null");
     }
 
+    /** Same as calling {@link #assertNotEmpty(String, String)} with the message:
+     * "The argument cannot be null or the empty string"
+     *
+     * @param reference
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static String assertNotEmpty(final String reference) throws IllegalArgumentException {
+        return assertNotEmpty(reference, "The argument cannot be null or the empty string");
+    }
+
     public static String assertNotEmpty(final String reference, final String msg) throws IllegalArgumentException {
         if (reference == null || reference.isEmpty()) {
             throw new IllegalArgumentException(msg);

@@ -125,6 +125,16 @@ public interface Buffer {
         return (a & 0xff) << 16 | (b & 0xff) << 8 | c & 0xff;
     }
 
+    /**
+     * Helper method to convert a byte into a binary string.
+     *
+     * @param b
+     * @return
+     */
+    static String toBinaryString(final byte b) {
+        return String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
+    }
+
     static Buffer of(final byte... buffer) {
         assertArray(buffer);
         return DefaultImmutableBuffer.of(buffer);
