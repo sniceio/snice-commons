@@ -15,9 +15,7 @@ import static io.snice.preconditions.PreConditions.assertArgument;
 import static io.snice.preconditions.PreConditions.assertArray;
 
 /**
- * The default implementation of our immutable buffer. This implementation
- * is also being used as a base class, which is why it has methods
- * for reader-index etc.
+ * The default implementation of our immutable buffer and is truly 100% immutable.
  */
 public class DefaultImmutableBuffer implements Buffer {
 
@@ -37,20 +35,6 @@ public class DefaultImmutableBuffer implements Buffer {
         }
 
         return new DefaultImmutableBuffer(buffer, offset, offset + length);
-    }
-
-    @Override
-    public int countWhiteSpace(final int startIndex) {
-        checkIndex(lowerBoundary + startIndex);
-        int count = 0;
-        for (int i = lowerBoundary + startIndex; i < upperBoundary; ++i) {
-            if (buffer[i] != SP && buffer[i] != HTAB) {
-                break;
-            }
-            ++count;
-        }
-
-        return count;
     }
 
     /**
@@ -74,6 +58,21 @@ public class DefaultImmutableBuffer implements Buffer {
         this.lowerBoundary = lowerBoundary;
         this.upperBoundary = upperBoundary;
     }
+
+    @Override
+    public int countWhiteSpace(final int startIndex) {
+        checkIndex(lowerBoundary + startIndex);
+        int count = 0;
+        for (int i = lowerBoundary + startIndex; i < upperBoundary; ++i) {
+            if (buffer[i] != SP && buffer[i] != HTAB) {
+                break;
+            }
+            ++count;
+        }
+
+        return count;
+    }
+
 
     @Override
     public Buffer toBuffer() {
@@ -214,7 +213,7 @@ public class DefaultImmutableBuffer implements Buffer {
     }
 
     @Override
-    public int getIntFromThreeOctets(int index) throws IndexOutOfBoundsException {
+    public int getIntFromThreeOctets(final int index) throws IndexOutOfBoundsException {
         final int i = lowerBoundary + index;
         checkIndex(i);
         checkIndex(i + 2);
@@ -562,8 +561,9 @@ public class DefaultImmutableBuffer implements Buffer {
      * @throws IndexOutOfBoundsException
      */
     protected void checkIndex(final int index) throws IndexOutOfBoundsException {
-        if (index >= this.lowerBoundary + capacity()) {
-            throw new IndexOutOfBoundsException();
+        final int upperBoundary = lowerBoundary + capacity();
+        if (index >= upperBoundary) {
+            throw new IndexOutOfBoundsException("Trying to access index " + index + " in a buffer whose upper bound is (exclusive) " + upperBoundary);
         }
     }
 }
