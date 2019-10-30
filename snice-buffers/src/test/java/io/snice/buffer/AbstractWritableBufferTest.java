@@ -1,0 +1,261 @@
+package io.snice.buffer;
+
+import org.junit.Test;
+
+import java.util.function.Supplier;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+
+public abstract class AbstractWritableBufferTest extends AbstractReadableBufferTest {
+
+    abstract WritableBuffer createWritableBuffer(final int capacity);
+
+    protected WritableBuffer createWritableBuffer(final int capacity, final int offset, final int length) {
+        return (WritableBuffer)createBuffer(new byte[capacity], offset, length);
+    }
+
+    @Test
+    public void testCapacity() {
+        assertThat(createWritableBuffer(10).capacity(), is(10));
+        assertThat(createWritableBuffer(10, 2, 4).capacity(), is(4));
+    }
+
+    @Test
+    public void testIsWritable() {
+        final WritableBuffer buffer = createWritableBuffer(10);
+        assertThat(buffer.hasWritableBytes(), is(true));
+        assertThat(buffer.hasReadableBytes(), is(false));
+        assertThat(buffer.getWritableBytes(), is(10));
+    }
+
+    @Test
+    public void testWriteIntAsString() {
+        final WritableBuffer buffer = createWritableBuffer(100);
+        buffer.writeAsString(0);
+        buffer.write((byte) ' ');
+        buffer.writeAsString(10);
+        buffer.write((byte) ' ');
+        buffer.writeAsString(100);
+        buffer.write((byte) ' ');
+        buffer.writeAsString(9712);
+        assertThat(buffer.toString(), is("0 10 100 9712"));
+    }
+
+    @Test
+    public void testWriteLongAsString() {
+        final WritableBuffer buffer = createWritableBuffer(100);
+        buffer.writeAsString(0L);
+        buffer.write((byte) ' ');
+        buffer.writeAsString(10L);
+        buffer.write((byte) ' ');
+        buffer.writeAsString(100L);
+        buffer.write((byte) ' ');
+        buffer.writeAsString(9712L);
+        assertThat(buffer.toString(), is("0 10 100 9712"));
+    }
+
+    /**
+     * If you create a new {@link WritableBuffer} with a certain capacity it is at that point
+     * considered "empty" and as such, you should not be able to actually read until you have
+     * written to the certain areas.
+     */
+    @Test
+    public void testReadShouldNotWork() {
+        final WritableBuffer buffer = createWritableBuffer(100);
+        testLotsOfWritesAndReads(buffer);
+
+        // now, if we reset the writer index we should be able to do it
+        // all over again...
+        buffer.setWriterIndex(0);
+        testLotsOfWritesAndReads(buffer);
+    }
+
+    private static void testLotsOfWritesAndReads(final WritableBuffer buffer) {
+        assertThat(buffer.hasReadableBytes(), is(false));
+        assertThat(buffer.isEmpty(), is(true));
+
+        ensureNoReadWorks(buffer);
+
+        // let's write one byte and read it back...
+        buffer.write((byte)'a');
+        assertThat(buffer.readByte(), is((byte)'a'));
+
+        // but now, after reading that byte, we should no longer be able to
+        // read again...
+        ensureNoReadWorks(buffer);
+
+        // write some more...
+        buffer.write((byte)'a');
+        buffer.write((byte)'b');
+        buffer.write((byte)'c');
+        buffer.write((byte)'d');
+        assertThat(buffer.readBytes(4).toString(), is("abcd"));
+
+        ensureNoReadWorks(buffer);
+
+        buffer.writeAsString(888);
+        buffer.write(999);
+        assertThat(buffer.readBytes(3).toString(), is("888"));
+        assertThat(buffer.readInt(), is(999));
+        ensureNoReadWorks(buffer);
+
+    }
+
+    private static void ensureNoReadWorks(final WritableBuffer buffer) {
+        ensureReadDoesntWork(() -> buffer.readByte());
+        ensureReadDoesntWork(() -> buffer.readUnsignedByte());
+
+        ensureReadDoesntWork(() -> buffer.readInt());
+        ensureReadDoesntWork(() -> buffer.readUnsignedInt());
+
+        ensureReadDoesntWork(() -> buffer.readBytes(1));
+        ensureReadDoesntWork(() -> buffer.readBytes(10));
+    }
+
+    private static void ensureReadDoesntWork(final Supplier<Object> tryReading) {
+        try {
+            tryReading.get();
+            fail("Expecetd to blow up on a " + IndexOutOfBoundsException.class.getName());
+        } catch (final IndexOutOfBoundsException e) {
+            // expected
+        }
+    }
+
+    @Test
+    public void testWriteThenRead() {
+        final WritableBuffer buffer = createWritableBuffer(100);
+        buffer.write(512);
+        buffer.write(123);
+
+        assertThat(buffer.hasReadableBytes(), is(true));
+        assertThat(buffer.getReadableBytes(), is(2 * 4));
+
+        assertThat(buffer.readInt(), is(512));
+        assertThat(buffer.readInt(), is(123));
+
+        assertThat(buffer.hasReadableBytes(), is(false));
+    }
+
+    @Test
+    public void testSetBits() {
+        final WritableBuffer buffer = (WritableBuffer)createBuffer(new byte[100]);
+        for (int i = 0; i < 10; ++i) {
+            ensureBits(buffer, i);
+        }
+
+        // now that we have actually turned on all bits in the array
+        // we should be able to read out
+        assertThat(buffer.readInt(), is(-1)); // because all bits are set so signed int should be -2
+        assertThat(buffer.readInt(), is(-1));
+    }
+
+    @Test
+    public void testSetBits2() {
+        // 97 binary is 1100001, let's set those bits
+        // and sure we can read out 97
+        final WritableBuffer buffer = (WritableBuffer)createBuffer(new byte[4]);
+        buffer.setBit0(3, true);
+        buffer.setBit5(3, true);
+        buffer.setBit6(3, true);
+
+        int value = buffer.getInt(0);
+        assertThat(value, is(97));
+
+        // then set the same pattern in the first byte
+        buffer.setBit0(0, true);
+        buffer.setBit5(0, true);
+        buffer.setBit6(0, true);
+
+        // when then if we just read that byte, it should also
+        // be integer 97 when converted
+        value = buffer.getByte(0);
+        assertThat(value, is(97));
+
+        // then let's make an integer our of only three bytes
+        value = buffer.getIntFromThreeOctets(1);
+        assertThat(value, is(97));
+
+        // let's flip those bits in the first byte back
+        // and then read byte after byte and only the
+        // last one should be 97
+        buffer.setBit0(0, false);
+        buffer.setBit5(0, false);
+        buffer.setBit6(0, false);
+        assertThat(buffer.readByte(), is((byte)0));
+        assertThat(buffer.readByte(), is((byte)0));
+        assertThat(buffer.readByte(), is((byte)0));
+        assertThat(buffer.readByte(), is((byte)97));
+
+        // finally check so the bit pattern are "checkable"
+        assertThat(buffer.getBit0(3), is(true));
+        assertThat(buffer.getBit1(3), is(false));
+        assertThat(buffer.getBit2(3), is(false));
+        assertThat(buffer.getBit3(3), is(false));
+        assertThat(buffer.getBit4(3), is(false));
+        assertThat(buffer.getBit5(3), is(true));
+        assertThat(buffer.getBit6(3), is(true));
+        assertThat(buffer.getBit7(3), is(false));
+    }
+
+    private static void ensureBits(final WritableBuffer buffer, final int index) {
+        ensureAllBits(buffer, index, false);
+
+        // just making sure that the short-hand versions
+        // is actually working.
+        buffer.setBit0(index, true);
+        buffer.setBit1(index, true);
+        buffer.setBit2(index, true);
+        buffer.setBit3(index, true);
+        buffer.setBit4(index, true);
+        buffer.setBit5(index, true);
+        buffer.setBit6(index, true);
+        buffer.setBit7(index, true);
+
+        assertThat(buffer.getBit0(index), is(true));
+        assertThat(buffer.getBit1(index), is(true));
+        assertThat(buffer.getBit2(index), is(true));
+        assertThat(buffer.getBit3(index), is(true));
+        assertThat(buffer.getBit4(index), is(true));
+        assertThat(buffer.getBit5(index), is(true));
+        assertThat(buffer.getBit6(index), is(true));
+        assertThat(buffer.getBit7(index), is(true));
+
+        // which should really be the same as above but who knows,
+        // copy-paste errors are easy to make
+        ensureAllBits(buffer, index, true);
+    }
+
+
+    private static void ensureAllBits(final Buffer buffer, final int index, final boolean on) {
+        for (int bit = 0; bit < 8; ++bit) {
+            assertThat(buffer.getBit(index, bit), is(on));
+        }
+    }
+
+    @Test
+    public void testZeroOut() {
+        ensureZeroOut('a', 150, 50, 50);
+        ensureZeroOut('b', 50, 10, 10);
+        ensureZeroOut('c', 10, 0, 1); // boundary testing
+        ensureZeroOut('c', 10, 9, 1); // boundary testing
+        ensureZeroOut('c', 10, 9, 0); // doesn't make sense but should work
+    }
+
+    private void ensureZeroOut(final char b, final int byteArrayLength, final int offset, final int length) {
+        final WritableBuffer buffer = (WritableBuffer)createBuffer(new byte[byteArrayLength], offset, length);
+        buffer.zeroOut((byte)b);
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < length; ++i) {
+            sb.append(b);
+        }
+        final String expected = sb.toString();
+        final String actual = buffer.toString();
+        assertThat(actual, is(expected));
+
+        for (int i = 0; i < length; ++i) {
+            assertThat(buffer.getByte(i), is((byte)b));
+        }
+    }
+}

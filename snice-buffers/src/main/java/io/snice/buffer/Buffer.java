@@ -5,6 +5,7 @@ import io.snice.buffer.impl.DefaultImmutableBuffer;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import static io.snice.preconditions.PreConditions.assertArgument;
 import static io.snice.preconditions.PreConditions.assertArray;
 import static io.snice.preconditions.PreConditions.assertNotNull;
 
@@ -467,6 +468,69 @@ public interface Buffer {
      * @return
      */
     Buffer slice();
+
+    /**
+     * Check whether a particular bit within a byte is on or off.
+     *
+     * @param byteIndex the index of the byte we are going to check.
+     * @param bitNo the bit no, which is zero indexed and of course needs to be within 0 to 7.
+     * @return
+     * @throws IllegalArgumentException in case the bit number is not between 0-7 (inclusive).
+     */
+    default boolean getBit(final int byteIndex, final int bitNo) throws IllegalArgumentException{
+        switch (bitNo) {
+            case 0:
+                return getBit0(byteIndex);
+            case 1:
+                return getBit1(byteIndex);
+            case 2:
+                return getBit2(byteIndex);
+            case 3:
+                return getBit3(byteIndex);
+            case 4:
+                return getBit4(byteIndex);
+            case 5:
+                return getBit5(byteIndex);
+            case 6:
+                return getBit6(byteIndex);
+            case 7:
+                return getBit7(byteIndex);
+            default:
+                throw new IllegalArgumentException("The bit number has to be between 0 - 7 (inclusive)");
+        }
+    }
+
+    default boolean getBit0(final int index) {
+        return (getByte(index) & 0b00000001) == 0b00000001;
+    }
+
+    default boolean getBit1(final int index) {
+        return (getByte(index) & 0b00000010) == 0b00000010;
+    }
+
+    default boolean getBit2(final int index) {
+        return (getByte(index) & 0b00000100) == 0b00000100;
+    }
+
+    default boolean getBit3(final int index) {
+        return (getByte(index) & 0b00001000) == 0b00001000;
+    }
+
+    default boolean getBit4(final int index) {
+        return (getByte(index) & 0b00010000) == 0b00010000;
+    }
+
+    default boolean getBit5(final int index) {
+        return (getByte(index) & 0b00100000) == 0b00100000;
+    }
+
+    default boolean getBit6(final int index) {
+        return (getByte(index) & 0b01000000) == 0b01000000;
+    }
+
+    default boolean getBit7(final int index) {
+        return (getByte(index) & 0b10000000) == 0b10000000;
+    }
 
     /**
      * Get the byte at the index.
