@@ -15,7 +15,7 @@
     <name>Snice Commons</name>
     <groupId>io.snice</groupId>
     <artifactId>snice-commons-parent</artifactId>
-    <version>0.1.2-SNAPSHOT</version>
+    <version>0.1.2</version>
     <packaging>pom</packaging>
     <description>Snice Commons - Because even Super Nice things have things in Common</description>
     <licenses>
