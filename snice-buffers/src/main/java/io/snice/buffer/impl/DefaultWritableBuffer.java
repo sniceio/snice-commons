@@ -5,7 +5,6 @@ import io.snice.buffer.Buffers;
 import io.snice.buffer.ByteNotFoundException;
 import io.snice.buffer.ReadableBuffer;
 import io.snice.buffer.WritableBuffer;
-import io.snice.buffer.WriteNotSupportedException;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -59,7 +58,7 @@ public final class DefaultWritableBuffer implements WritableBuffer {
      * Same logic applies to the lower boundary.
      */
     private final int upperBoundary;
-    private final int lowerBoundary;
+    private int lowerBoundary;
 
     /**
      * Note that the writer index is, like the reader index, zero based against
@@ -80,7 +79,6 @@ public final class DefaultWritableBuffer implements WritableBuffer {
      */
     public static WritableBuffer of(final byte[] buffer) {
         assertArray(buffer);
-
         return new DefaultWritableBuffer(buffer);
     }
 
@@ -89,10 +87,8 @@ public final class DefaultWritableBuffer implements WritableBuffer {
         return new DefaultWritableBuffer(capacity);
     }
 
-    public static Buffer of(final byte[] buffer, final int offset, final int length) {
+    public static WritableBuffer of(final byte[] buffer, final int offset, final int length) {
         assertArray(buffer, offset, length);
-        // assertArgument(length > 0, "You cannot create a writable buffer of zero length");
-
         return new DefaultWritableBuffer(buffer, offset, length);
     }
 
@@ -144,10 +140,10 @@ public final class DefaultWritableBuffer implements WritableBuffer {
     public void setUnsignedInt(final int index, final long value) throws IndexOutOfBoundsException {
         checkIndex(index);
         checkIndex(index + 3);
-        buffer[lowerBoundary + index + 0] = (byte) value;
-        buffer[lowerBoundary + index + 1] = (byte) (value >>> 8);
-        buffer[lowerBoundary + index + 2] = (byte) (value >>> 16);
-        buffer[lowerBoundary + index + 3] = (byte) (value >>> 24);
+        buffer[lowerBoundary + index + 3] = (byte) value;
+        buffer[lowerBoundary + index + 2] = (byte) (value >>> 8);
+        buffer[lowerBoundary + index + 1] = (byte) (value >>> 16);
+        buffer[lowerBoundary + index + 0] = (byte) (value >>> 24);
     }
 
     @Override
@@ -225,6 +221,9 @@ public final class DefaultWritableBuffer implements WritableBuffer {
 
     @Override
     public void setWriterIndex(final int index) {
+        if (capacity() == 0) {
+            throw new IndexOutOfBoundsException("The capacity of this buffer is zero, hence, it is effectively empty and as such, you cannot set the writer index to anything");
+        }
         // also pay attention to the reader index! See the javadoc
         if (wrap.getReaderIndex() > index) {
             wrap.setReaderIndex(index);
@@ -243,14 +242,14 @@ public final class DefaultWritableBuffer implements WritableBuffer {
     }
 
     @Override
-    public void write(final byte b) throws IndexOutOfBoundsException, WriteNotSupportedException {
+    public void write(final byte b) throws IndexOutOfBoundsException{
         checkWriterIndex(writerIndex);
         buffer[lowerBoundary + writerIndex] = b;
         ++writerIndex;
     }
 
     @Override
-    public void write(final byte[] bytes) throws IndexOutOfBoundsException, WriteNotSupportedException {
+    public void write(final byte[] bytes) throws IndexOutOfBoundsException{
         if (!checkWritableBytesSafe(bytes.length)) {
             throw new IndexOutOfBoundsException("Unable to write the entire String to this buffer. Nothing was written");
         }
@@ -260,7 +259,7 @@ public final class DefaultWritableBuffer implements WritableBuffer {
     }
 
     @Override
-    public void write(final int value) throws IndexOutOfBoundsException, WriteNotSupportedException {
+    public void write(final int value) throws IndexOutOfBoundsException{
         if (!checkWritableBytesSafe(4)) {
             throw new IndexOutOfBoundsException("Unable to write the entire int to this buffer. Nothing was written");
         }
@@ -273,40 +272,94 @@ public final class DefaultWritableBuffer implements WritableBuffer {
     }
 
     @Override
-    public void write(final long value) throws IndexOutOfBoundsException, WriteNotSupportedException {
+    public void write(final long value) throws IndexOutOfBoundsException{
         if (!checkWritableBytesSafe(8)) {
-            throw new IndexOutOfBoundsException("Unable to write the entire String to this buffer. Nothing was written");
+            throw new IndexOutOfBoundsException("Unable to write the entire long to this buffer. Nothing was written");
         }
         final int index = lowerBoundary + writerIndex;
-        buffer[index + 0] = (byte) (value >>> 56);
-        buffer[index + 1] = (byte) (value >>> 48);
-        buffer[index + 2] = (byte) (value >>> 40);
-        buffer[index + 3] = (byte) (value >>> 32);
-        buffer[index + 4] = (byte) (value >>> 24);
-        buffer[index + 5] = (byte) (value >>> 16);
-        buffer[index + 6] = (byte) (value >>> 8);
-        buffer[index + 7] = (byte) value;
+        // buffer[index + 0] = (byte) (value >>> 56);
+        // buffer[index + 1] = (byte) (value >>> 48);
+        // buffer[index + 2] = (byte) (value >>> 40);
+        // buffer[index + 3] = (byte) (value >>> 32);
+        // buffer[index + 4] = (byte) (value >>> 24);
+        // buffer[index + 5] = (byte) (value >>> 16);
+        // buffer[index + 6] = (byte) (value >>> 8);
+        // buffer[index + 7] = (byte) (value >>> 0);
+
+            buffer[index + 0] = (byte)(value >>> 56);
+            buffer[index + 1] = (byte)(value >>> 48);
+            buffer[index + 2] = (byte)(value >>> 40);
+            buffer[index + 3] = (byte)(value >>> 32);
+            buffer[index + 4] = (byte)(value >>> 24);
+            buffer[index + 5] = (byte)(value >>> 16);
+            buffer[index + 6] = (byte)(value >>>  8);
+            buffer[index + 7] = (byte)(value >>>  0);
+
+        // writeBuffer[0] = (byte)(v >>> 56);
+        // writeBuffer[1] = (byte)(v >>> 48);
+        // writeBuffer[2] = (byte)(v >>> 40);
+        // writeBuffer[3] = (byte)(v >>> 32);
+        // writeBuffer[4] = (byte)(v >>> 24);
+        // writeBuffer[5] = (byte)(v >>> 16);
+        // writeBuffer[6] = (byte)(v >>>  8);
+        // writeBuffer[7] = (byte)(v >>>  0);
+
+        // buffer[index + 0] = (byte) ((value >> 56) & 0xFF);
+        // buffer[index + 1] = (byte) ((value >> 48) & 0xFF);
+        // buffer[index + 2] = (byte) ((value >> 40) & 0xFF);
+        // buffer[index + 3] = (byte) ((value >> 32) & 0xFF);
+        // buffer[index + 4] = (byte) ((value >> 24) & 0xFF);
+        // buffer[index + 5] = (byte) ((value >> 16) & 0xFF);
+        // buffer[index + 6] = (byte) ((value >> 8) & 0xFF);
+        // buffer[index + 7] = (byte) ((value >> 0) & 0xFF);
+
+        // buffer[index + 7] = (byte) ((value >> 56) & 0xFF);
+        // buffer[index + 6] = (byte) ((value >> 48) & 0xFF);
+        // buffer[index + 5] = (byte) ((value >> 40) & 0xFF);
+        // buffer[index + 4] = (byte) ((value >> 32) & 0xFF);
+        // buffer[index + 3] = (byte) ((value >> 24) & 0xFF);
+        // buffer[index + 2] = (byte) ((value >> 16) & 0xFF);
+        // buffer[index + 1] = (byte) ((value >> 8) & 0xFF);
+        // buffer[index + 0] = (byte) ((value >> 0) & 0xFF);
+
         writerIndex += 8;
     }
 
+    private static byte[] longtoBytes(final long data) {
+        return new byte[]{
+                (byte) ((data >> 56) & 0xff),
+                (byte) ((data >> 48) & 0xff),
+                (byte) ((data >> 40) & 0xff),
+                (byte) ((data >> 32) & 0xff),
+                (byte) ((data >> 24) & 0xff),
+                (byte) ((data >> 16) & 0xff),
+                (byte) ((data >> 8) & 0xff),
+                (byte) ((data >> 0) & 0xff),
+        };
+    }
+
     @Override
-    public void write(final String s) throws IndexOutOfBoundsException, WriteNotSupportedException, UnsupportedEncodingException {
+    public void write(final String s) throws IndexOutOfBoundsException{
         write(s, "UTF-8");
     }
 
     @Override
-    public void write(final String s, final String charset) throws IndexOutOfBoundsException, WriteNotSupportedException, UnsupportedEncodingException {
-        final byte[] bytes = s.getBytes(charset);
-        if (!checkWritableBytesSafe(bytes.length)) {
-            throw new IndexOutOfBoundsException("Unable to write the entire String to this buffer. Nothing was written");
-        }
+    public void write(final String s, final String charset) throws IndexOutOfBoundsException{
+        try {
+            final byte[] bytes = s.getBytes(charset);
+            if (!checkWritableBytesSafe(bytes.length)) {
+                throw new IndexOutOfBoundsException("Unable to write the entire String to this buffer. Nothing was written");
+            }
 
-        System.arraycopy(bytes, 0, buffer, writerIndex, bytes.length);
-        writerIndex += bytes.length;
+            System.arraycopy(bytes, 0, buffer, writerIndex, bytes.length);
+            writerIndex += bytes.length;
+        } catch (final UnsupportedEncodingException e) {
+            throw new IllegalArgumentException("Charset " + charset + " is not supported by the platform", e);
+        }
     }
 
     @Override
-    public void writeAsString(final int value) throws IndexOutOfBoundsException, WriteNotSupportedException {
+    public void writeAsString(final int value) throws IndexOutOfBoundsException{
         final int size = value < 0 ? Buffers.stringSize(-value) + 1 : Buffers.stringSize(value);
         if (!checkWritableBytesSafe(size)) {
             throw new IndexOutOfBoundsException();
@@ -316,7 +369,7 @@ public final class DefaultWritableBuffer implements WritableBuffer {
     }
 
     @Override
-    public void writeAsString(final long value) throws IndexOutOfBoundsException, WriteNotSupportedException {
+    public void writeAsString(final long value) throws IndexOutOfBoundsException {
         final int size = value < 0 ? Buffers.stringSize(-value) + 1 : Buffers.stringSize(value);
         if (!checkWritableBytesSafe(size)) {
             throw new IndexOutOfBoundsException();
@@ -417,6 +470,11 @@ public final class DefaultWritableBuffer implements WritableBuffer {
     }
 
     @Override
+    public long getLong(final int index) throws IndexOutOfBoundsException {
+        return wrap.getLong(index);
+    }
+
+    @Override
     public int getIntFromThreeOctets(final int index) throws IndexOutOfBoundsException {
         return wrap.getIntFromThreeOctets(index);
     }
@@ -504,7 +562,14 @@ public final class DefaultWritableBuffer implements WritableBuffer {
 
     @Override
     public ReadableBuffer setReaderIndex(final int index) {
-        assertArgument(index <= writerIndex, "The reader index cannot be greater than that of the writer index");
+
+        // for the case when we have build() this buffer and as such,
+        // we can no longer actually use it.
+        if (capacity() == 0) {
+            throw new IndexOutOfBoundsException("The capacity of this buffer is zero, hence, it is effectively empty and as such, you cannot set the reader index to anything");
+        }
+
+        assertArgument(index < writerIndex, "The reader index cannot be greater than that of the writer index");
         wrap.setReaderIndex(index);
         return this;
     }
@@ -542,6 +607,12 @@ public final class DefaultWritableBuffer implements WritableBuffer {
     public int readInt() throws IndexOutOfBoundsException {
         checkReadableBytes(4);
         return wrap.readInt();
+    }
+
+    @Override
+    public long readLong() throws IndexOutOfBoundsException {
+        checkReadableBytes(8);
+        return wrap.readLong();
     }
 
     @Override
@@ -633,6 +704,21 @@ public final class DefaultWritableBuffer implements WritableBuffer {
             buffer[i] = b;
         }
     }
+
+    @Override
+    public Buffer build() {
+        final int length = getReadableBytes();
+        // final byte[] array = new byte[length];
+        // System.arraycopy(buffer, lowerBoundary + wrap.getReaderIndex(), array, 0, length);
+
+        final Buffer b = Buffer.of(buffer, lowerBoundary + wrap.getReaderIndex(), length);
+        wrap.setReaderIndex(upperBoundary);
+        writerIndex = upperBoundary;
+        lowerBoundary = upperBoundary;
+
+        return b;
+    }
+
 
     private void checkIndex(final int index) throws IndexOutOfBoundsException {
         if (index >= lowerBoundary + capacity()) {

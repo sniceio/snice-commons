@@ -76,6 +76,15 @@ public interface ReadableBuffer extends Buffer {
     int readInt() throws IndexOutOfBoundsException;
 
     /**
+     * Read a long and will increase the reader index of this buffer by 8
+     *
+     * @return the long value
+     * @throws IndexOutOfBoundsException
+     *             in case there is not 8 bytes left to read
+     */
+    long readLong() throws IndexOutOfBoundsException;
+
+    /**
      * Read the requested number of bytes and increase the readerIndex with the
      * corresponding number of bytes. The new buffer and this buffer both share
      * the same backing array so changing either one of them will affect the

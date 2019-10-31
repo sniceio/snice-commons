@@ -2,7 +2,7 @@ package io.snice.buffer;
 
 import org.junit.Test;
 
-import java.util.function.Supplier;
+import java.util.function.Consumer;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -104,23 +104,14 @@ public abstract class AbstractWritableBufferTest extends AbstractReadableBufferT
     }
 
     private static void ensureNoReadWorks(final WritableBuffer buffer) {
-        ensureReadDoesntWork(() -> buffer.readByte());
-        ensureReadDoesntWork(() -> buffer.readUnsignedByte());
+        ensureDoesntWork(buffer, b -> b.readByte());
+        ensureDoesntWork(buffer, b -> b.readUnsignedByte());
 
-        ensureReadDoesntWork(() -> buffer.readInt());
-        ensureReadDoesntWork(() -> buffer.readUnsignedInt());
+        ensureDoesntWork(buffer, b -> b.readInt());
+        ensureDoesntWork(buffer, b -> b.readUnsignedInt());
 
-        ensureReadDoesntWork(() -> buffer.readBytes(1));
-        ensureReadDoesntWork(() -> buffer.readBytes(10));
-    }
-
-    private static void ensureReadDoesntWork(final Supplier<Object> tryReading) {
-        try {
-            tryReading.get();
-            fail("Expecetd to blow up on a " + IndexOutOfBoundsException.class.getName());
-        } catch (final IndexOutOfBoundsException e) {
-            // expected
-        }
+        ensureDoesntWork(buffer, b -> b.readBytes(1));
+        ensureDoesntWork(buffer, b -> b.readBytes(10));
     }
 
     @Test
@@ -258,4 +249,101 @@ public abstract class AbstractWritableBufferTest extends AbstractReadableBufferT
             assertThat(buffer.getByte(i), is((byte)b));
         }
     }
+
+    @Test
+    public void testBuild() throws Exception {
+        final int capacity = 100;
+        final WritableBuffer buffer = createWritableBuffer(capacity);
+        buffer.write("hello world");
+
+        // build it and make sure that the new buffer is indeed 100% immutble
+        // and that our old writable buffer cannot affect it in anyway...
+        final Buffer immutable = buffer.build();
+        assertThat(immutable.toString(), is("hello world"));
+        assertThat(immutable.toReadableBuffer().readUntilWhiteSpace().toString(), is(("hello")));
+        assertThat(immutable.slice(immutable.indexOfWhiteSpace()).toString(), is("hello"));
+        assertThat(immutable.slice(immutable.indexOfWhiteSpace() + 1, immutable.capacity()).toString(), is("world"));
+
+        ensureDoesntWork(buffer, b -> b.setByte(1, (byte)'a'));
+        ensureDoesntWork(buffer, b -> b.setByte(0, (byte)'a'));
+        ensureDoesntWork(buffer, b -> b.write("asdf"));
+        ensureDoesntWork(buffer, b -> b.write(5));
+        ensureDoesntWork(buffer, b -> b.write(5L));
+        ensureDoesntWork(buffer, b -> b.readByte());
+
+        // you can't mess with the reader & writer index either
+        // going beyond the capacity (hence the +1 below) just to test
+        // that boundary as well
+        for (int i = 0; i < capacity + 1; ++i) {
+            final int index = i;
+            ensureDoesntWork(buffer, b -> b.setReaderIndex(index));
+            ensureDoesntWork(buffer, b -> b.setWriterIndex(index));
+        }
+    }
+
+    @Test
+    public void testSetUnsignedInt() {
+        final WritableBuffer buffer = (WritableBuffer)createBuffer(new byte[100]);
+        buffer.setUnsignedInt(0, 100);
+        assertThat(buffer.getUnsignedInt(0), is(100L));
+        assertThat(buffer.readUnsignedInt(), is(100L));
+    }
+
+    @Test
+    public void testSetInt() {
+        final WritableBuffer buffer = (WritableBuffer)createBuffer(new byte[100]);
+        buffer.setInt(0, 100);
+        assertThat(buffer.getInt(0), is(100));
+        assertThat(buffer.readInt(), is(100));
+
+        buffer.setUnsignedInt(12, 1234567);
+        assertThat(buffer.getInt(12), is(1234567));
+    }
+
+    @Test
+    public void writeNumbers() {
+        final WritableBuffer buffer = (createWritableBuffer(100));
+        buffer.write(567);
+        buffer.write(789);
+        buffer.write(Integer.MAX_VALUE);
+        buffer.write(-1);
+
+        assertThat(buffer.readInt(), is(567));
+        assertThat(buffer.readInt(), is(789));
+        assertThat(buffer.readInt(), is(Integer.MAX_VALUE));
+        assertThat(buffer.readInt(), is(-1));
+
+        buffer.write(10L);
+        assertThat(buffer.readLong(), is(10L));
+
+        buffer.write(Long.MAX_VALUE);
+        assertThat(buffer.readLong(), is(Long.MAX_VALUE));
+
+        // -7 because you know, why not...
+        buffer.write(Long.MAX_VALUE - 7);
+        assertThat(buffer.readLong(), is(Long.MAX_VALUE - 7));
+
+        buffer.write(9999999999L);
+        assertThat(buffer.readLong(), is(9999999999L));
+
+        buffer.write(99999999999L);
+        assertThat(buffer.readLong(), is(99999999999L));
+
+        buffer.write(-1L);
+        assertThat(buffer.readLong(), is(-1L));
+    }
+
+    /**
+     * Helper method to ensure that if the operation is performed, we blow up on an {@link IllegalArgumentException}
+     *
+     */
+    private static void ensureDoesntWork(final WritableBuffer b, final Consumer<WritableBuffer> operation) {
+        try {
+            operation.accept(b);
+            fail("Expected to blow up on a " + IndexOutOfBoundsException.class.getName());
+        } catch (final IndexOutOfBoundsException e) {
+            // expected
+        }
+    }
+
 }

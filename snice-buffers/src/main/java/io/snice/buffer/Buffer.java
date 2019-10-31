@@ -5,7 +5,6 @@ import io.snice.buffer.impl.DefaultImmutableBuffer;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import static io.snice.preconditions.PreConditions.assertArgument;
 import static io.snice.preconditions.PreConditions.assertArray;
 import static io.snice.preconditions.PreConditions.assertNotNull;
 
@@ -111,7 +110,31 @@ public interface Buffer {
      * @return
      */
     static int signedInt(final byte a, final byte b, final byte c, final byte d) {
-        return (a & 0xff) << 24 | (b & 0xff) << 16 | (c & 0xff) << 8 | d & 0xff;
+        return a << 24 | (b & 0xff) << 16 | (c & 0xff) << 8 | d & 0xff;
+    }
+
+    static long signedLong(final byte a, final byte b, final byte c, final byte d, final byte e, final byte f, final byte g, final byte h) {
+        /*
+        return (long)(a << 56)
+                | (long)(b & 0xff) << 48
+                | (long)(c & 0xff) << 40
+                | (long)(d & 0xff) << 32
+                | (long)(e & 0xff) << 24
+                | (long)(f & 0xff) << 16
+                | (long)(g & 0xff) << 8
+                | (long)(h & 0xff) << 0;
+
+         */
+
+        // from DataInputStream.readLong
+        return (((long)a << 56) +
+                ((long)(b & 255) << 48) +
+                ((long)(c & 255) << 40) +
+                ((long)(d & 255) << 32) +
+                ((long)(e & 255) << 24) +
+                ((f & 255) << 16) +
+                ((g & 255) <<  8) +
+                (h & 255));
     }
 
     /**
@@ -125,6 +148,7 @@ public interface Buffer {
     static int signedInt(final byte a, final byte b, final byte c) {
         return (a & 0xff) << 16 | (b & 0xff) << 8 | c & 0xff;
     }
+
 
     /**
      * Helper method to convert a byte into a binary string.
@@ -543,8 +567,7 @@ public interface Buffer {
     byte getByte(int index) throws IndexOutOfBoundsException;
 
     /**
-     * Get a 32-bit integer at the specified absolute index. This method will
-     * not modify the readerIndex of this buffer.
+     * Get a 32-bit integer at the specified absolute index.
      *
      * @param index
      * @return
@@ -552,6 +575,16 @@ public interface Buffer {
      *             in case there is not 4 bytes left to read
      */
     int getInt(int index) throws IndexOutOfBoundsException;
+
+    /**
+     * Get a 64-bit long at the specified absolute index.
+     *
+     * @param index
+     * @return
+     * @throws IndexOutOfBoundsException
+     *             in case there is not 8 bytes left to read
+     */
+    long getLong(int index) throws IndexOutOfBoundsException;
 
     /**
      * Somewhat of an odd method but there are times when you need to parse out

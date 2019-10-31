@@ -166,7 +166,13 @@ public class EmptyBuffer implements ReadableBuffer {
         throw new IndexOutOfBoundsException(THIS_BUFFER_IS_EMPTY);
     }
 
-    public int getIntFromThreeOctets(int index) throws IndexOutOfBoundsException {
+    @Override
+    public long getLong(final int index) throws IndexOutOfBoundsException {
+        throw new IndexOutOfBoundsException(THIS_BUFFER_IS_EMPTY);
+    }
+
+    @Override
+    public int getIntFromThreeOctets(final int index) throws IndexOutOfBoundsException {
         throw new IndexOutOfBoundsException(THIS_BUFFER_IS_EMPTY);
     }
 
@@ -242,6 +248,11 @@ public class EmptyBuffer implements ReadableBuffer {
 
     @Override
     public int readInt() throws IndexOutOfBoundsException {
+        throw new IndexOutOfBoundsException(NOT_ENOUGH_READABLE_BYTES);
+    }
+
+    @Override
+    public long readLong() throws IndexOutOfBoundsException {
         throw new IndexOutOfBoundsException(NOT_ENOUGH_READABLE_BYTES);
     }
 

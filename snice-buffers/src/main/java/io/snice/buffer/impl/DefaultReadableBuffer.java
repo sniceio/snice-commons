@@ -107,6 +107,13 @@ public class DefaultReadableBuffer implements ReadableBuffer  {
     }
 
     @Override
+    public long readLong() throws IndexOutOfBoundsException {
+        final long value = getLong(readerIndex);
+        readerIndex += 8;
+        return value;
+    }
+
+    @Override
     public Buffer readBytes(final int length) throws IndexOutOfBoundsException {
         if (length == 0) {
             return EmptyBuffer.EMPTY;
@@ -406,7 +413,12 @@ public class DefaultReadableBuffer implements ReadableBuffer  {
     }
 
     @Override
-    public int getIntFromThreeOctets(int index) throws IndexOutOfBoundsException {
+    public long getLong(final int index) throws IndexOutOfBoundsException {
+        return buffer.getLong(index);
+    }
+
+    @Override
+    public int getIntFromThreeOctets(final int index) throws IndexOutOfBoundsException {
         return buffer.getIntFromThreeOctets(index);
     }
 

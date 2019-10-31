@@ -1,8 +1,25 @@
 package io.snice.buffer;
 
+import io.snice.buffer.impl.DefaultWritableBuffer;
+
 import java.io.UnsupportedEncodingException;
 
+import static io.snice.preconditions.PreConditions.assertArray;
+
 public interface WritableBuffer extends ReadableBuffer {
+
+    static WritableBuffer of(final byte... buffer) {
+        assertArray(buffer);
+        return DefaultWritableBuffer.of(buffer);
+    }
+
+    static WritableBuffer of(final int capacity) {
+        return DefaultWritableBuffer.of(capacity);
+    }
+
+    static WritableBuffer of(final byte[] buffer, final int offset, final int length) {
+        return DefaultWritableBuffer.of(buffer, offset, length);
+    }
 
     void setUnsignedByte(int index, short value) throws IndexOutOfBoundsException;
     void setUnsignedShort(int index, int value) throws IndexOutOfBoundsException;
@@ -87,26 +104,19 @@ public interface WritableBuffer extends ReadableBuffer {
     boolean hasWritableBytes();
 
     /**
-     * Write a byte to where the current writer index is pointing. Note, many
-     * implementations may not support writing and if they don't, they will
-     * throw a {@link WriteNotSupportedException}
+     * Write a byte to where the current writer index is pointing.
      *
      * @param b
      * @throws IndexOutOfBoundsException
-     *             in case there is no more space to write to (which includes
-     *             those cases where the underlying implementation does not
-     *             support writing)
-     * @throws WriteNotSupportedException
-     *             in case the underlying implementation does not support
-     *             writes.
+     *             in case there is no more space to write to.
      */
-    void write(byte b) throws IndexOutOfBoundsException, WriteNotSupportedException;
+    void write(byte b) throws IndexOutOfBoundsException;
 
-    void write(byte[] bytes) throws IndexOutOfBoundsException, WriteNotSupportedException;
+    void write(byte[] bytes) throws IndexOutOfBoundsException;
 
-    void write(int value) throws IndexOutOfBoundsException, WriteNotSupportedException;
+    void write(int value) throws IndexOutOfBoundsException;
 
-    void write(long value) throws IndexOutOfBoundsException, WriteNotSupportedException;
+    void write(long value) throws IndexOutOfBoundsException;
 
     /**
      * Same as {@link WritableBuffer#write(String, String)} where the charset is set to
@@ -118,7 +128,7 @@ public interface WritableBuffer extends ReadableBuffer {
      * @throws UnsupportedEncodingException
      *             in case the charset "UTF-8" is not supported by the platform.
      */
-    void write(String s) throws IndexOutOfBoundsException, WriteNotSupportedException, UnsupportedEncodingException;
+    void write(String s) throws IndexOutOfBoundsException;
 
     /**
      * Write the integer value to this {@link WritableBuffer} as a String.
@@ -127,9 +137,8 @@ public interface WritableBuffer extends ReadableBuffer {
      *            the value that will be converted to a String before being
      *            written to this {@link WritableBuffer}.
      * @throws IndexOutOfBoundsException
-     * @throws WriteNotSupportedException
      */
-    void writeAsString(int value) throws IndexOutOfBoundsException, WriteNotSupportedException;
+    void writeAsString(int value) throws IndexOutOfBoundsException;
 
     /**
      * Write the long value to this {@link WritableBuffer} as a String.
@@ -137,9 +146,8 @@ public interface WritableBuffer extends ReadableBuffer {
      * @param value the value that will be converted to a String before being written to this
      *        {@link WritableBuffer}.
      * @throws IndexOutOfBoundsException
-     * @throws WriteNotSupportedException
      */
-    void writeAsString(long value) throws IndexOutOfBoundsException, WriteNotSupportedException;
+    void writeAsString(long value) throws IndexOutOfBoundsException;
 
     /**
      * Write a string to this buffer using the specified charset to convert the String into bytes.
@@ -153,10 +161,9 @@ public interface WritableBuffer extends ReadableBuffer {
      * @param charset
      * @throws IndexOutOfBoundsException in case we cannot write entire String to this
      *         {@link WritableBuffer}.
-     * @throws WriteNotSupportedException
      * @throws UnsupportedEncodingException in case the specified charset is not supported
      */
-    void write(final String s, String charset) throws IndexOutOfBoundsException, WriteNotSupportedException,
+    void write(final String s, String charset) throws IndexOutOfBoundsException ,
             UnsupportedEncodingException;
 
     /**
@@ -193,4 +200,35 @@ public interface WritableBuffer extends ReadableBuffer {
      */
     @Override
     WritableBuffer clone();
+
+    /**
+     * Depending on the use case, you may find yourself creating a {@link WritableBuffer}, write some stuff
+     * and then "freeze" it in place so no other modifications can be made to it. One way to accomplish that is to
+     * use the method {@link #toBuffer()}, which in the context of the {@link WritableBuffer} will create
+     * an immutable {@link Buffer} by copying the entire underlying byte-array (only the portion that has been
+     * written to of course). This would achieve a thread safe 100% immutable buffer that you can safely pass around
+     * and be certain no harm can come to it.
+     *
+     * However, your application may not tolerate that extra byte-array copy and as such, you just want to "freeze"
+     * the current {@link WritableBuffer} because you are "done" and as such, you wish to convert it into an
+     * immutable {@link Buffer} instead. This {@link #build()} method does that and works as follows:
+     *
+     * A new immutable {@link Buffer} using current underlying byte-array of the {@link WritableBuffer} will
+     * be created. The reference within the {@link WritableBuffer} will be set to null and the writer and reader
+     * index of the {@link WritableBuffer} will be set to values indicating that there is no more room to write
+     * and no more data available for reading.
+     *
+     * Calls to {@link #setWriterIndex(int)} and {@link #setReaderIndex(int)} will be disallowed and an
+     * {@link IllegalStateException} will be thrown.
+     *
+     * Any method calls to modify the underlying data (so setXXX and write's) will "blow up"
+     * on {@link IndexOutOfBoundsException}s since the writer index indicates that there is no more room
+     * to write.
+     *
+     * Any method calls to read data (both readXXX and getXXX) will also "blow up" on {@link IndexOutOfBoundsException}
+     * since the reader index now also indicates that there are no more data to read.
+     *
+     * @return
+     */
+    Buffer build();
 }
