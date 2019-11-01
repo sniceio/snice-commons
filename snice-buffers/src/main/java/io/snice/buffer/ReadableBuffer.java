@@ -274,5 +274,5 @@ public interface ReadableBuffer extends Buffer {
      * @return
      */
     @Override
-    ReadableBuffer clone();
+    Object clone();
 }

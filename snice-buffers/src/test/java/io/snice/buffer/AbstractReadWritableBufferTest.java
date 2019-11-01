@@ -8,12 +8,12 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-public abstract class AbstractWritableBufferTest extends AbstractReadableBufferTest {
+public abstract class AbstractReadWritableBufferTest extends AbstractReadableBufferTest {
 
-    abstract WritableBuffer createWritableBuffer(final int capacity);
+    abstract ReadWriteBuffer createWritableBuffer(final int capacity);
 
-    protected WritableBuffer createWritableBuffer(final int capacity, final int offset, final int length) {
-        return (WritableBuffer)createBuffer(new byte[capacity], offset, length);
+    protected ReadWriteBuffer createWritableBuffer(final int capacity, final int offset, final int length) {
+        return (ReadWriteBuffer)createBuffer(new byte[capacity], offset, length);
     }
 
     @Test
@@ -24,7 +24,7 @@ public abstract class AbstractWritableBufferTest extends AbstractReadableBufferT
 
     @Test
     public void testIsWritable() {
-        final WritableBuffer buffer = createWritableBuffer(10);
+        final ReadWriteBuffer buffer = createWritableBuffer(10);
         assertThat(buffer.hasWritableBytes(), is(true));
         assertThat(buffer.hasReadableBytes(), is(false));
         assertThat(buffer.getWritableBytes(), is(10));
@@ -32,7 +32,7 @@ public abstract class AbstractWritableBufferTest extends AbstractReadableBufferT
 
     @Test
     public void testWriteIntAsString() {
-        final WritableBuffer buffer = createWritableBuffer(100);
+        final ReadWriteBuffer buffer = createWritableBuffer(100);
         buffer.writeAsString(0);
         buffer.write((byte) ' ');
         buffer.writeAsString(10);
@@ -45,7 +45,7 @@ public abstract class AbstractWritableBufferTest extends AbstractReadableBufferT
 
     @Test
     public void testWriteLongAsString() {
-        final WritableBuffer buffer = createWritableBuffer(100);
+        final ReadWriteBuffer buffer = createWritableBuffer(100);
         buffer.writeAsString(0L);
         buffer.write((byte) ' ');
         buffer.writeAsString(10L);
@@ -63,7 +63,7 @@ public abstract class AbstractWritableBufferTest extends AbstractReadableBufferT
      */
     @Test
     public void testReadShouldNotWork() {
-        final WritableBuffer buffer = createWritableBuffer(100);
+        final ReadWriteBuffer buffer = createWritableBuffer(100);
         testLotsOfWritesAndReads(buffer);
 
         // now, if we reset the writer index we should be able to do it
@@ -72,7 +72,7 @@ public abstract class AbstractWritableBufferTest extends AbstractReadableBufferT
         testLotsOfWritesAndReads(buffer);
     }
 
-    private static void testLotsOfWritesAndReads(final WritableBuffer buffer) {
+    private static void testLotsOfWritesAndReads(final ReadWriteBuffer buffer) {
         assertThat(buffer.hasReadableBytes(), is(false));
         assertThat(buffer.isEmpty(), is(true));
 
@@ -103,7 +103,7 @@ public abstract class AbstractWritableBufferTest extends AbstractReadableBufferT
 
     }
 
-    private static void ensureNoReadWorks(final WritableBuffer buffer) {
+    private static void ensureNoReadWorks(final ReadWriteBuffer buffer) {
         ensureDoesntWork(buffer, b -> b.readByte());
         ensureDoesntWork(buffer, b -> b.readUnsignedByte());
 
@@ -116,7 +116,7 @@ public abstract class AbstractWritableBufferTest extends AbstractReadableBufferT
 
     @Test
     public void testWriteThenRead() {
-        final WritableBuffer buffer = createWritableBuffer(100);
+        final ReadWriteBuffer buffer = createWritableBuffer(100);
         buffer.write(512);
         buffer.write(123);
 
@@ -131,7 +131,7 @@ public abstract class AbstractWritableBufferTest extends AbstractReadableBufferT
 
     @Test
     public void testSetBits() {
-        final WritableBuffer buffer = (WritableBuffer)createBuffer(new byte[100]);
+        final ReadWriteBuffer buffer = (ReadWriteBuffer)createBuffer(new byte[100]);
         for (int i = 0; i < 10; ++i) {
             ensureBits(buffer, i);
         }
@@ -146,7 +146,7 @@ public abstract class AbstractWritableBufferTest extends AbstractReadableBufferT
     public void testSetBits2() {
         // 97 binary is 1100001, let's set those bits
         // and sure we can read out 97
-        final WritableBuffer buffer = (WritableBuffer)createBuffer(new byte[4]);
+        final ReadWriteBuffer buffer = (ReadWriteBuffer)createBuffer(new byte[4]);
         buffer.setBit0(3, true);
         buffer.setBit5(3, true);
         buffer.setBit6(3, true);
@@ -190,7 +190,7 @@ public abstract class AbstractWritableBufferTest extends AbstractReadableBufferT
         assertThat(buffer.getBit7(3), is(false));
     }
 
-    private static void ensureBits(final WritableBuffer buffer, final int index) {
+    private static void ensureBits(final ReadWriteBuffer buffer, final int index) {
         ensureAllBits(buffer, index, false);
 
         // just making sure that the short-hand versions
@@ -235,7 +235,7 @@ public abstract class AbstractWritableBufferTest extends AbstractReadableBufferT
     }
 
     private void ensureZeroOut(final char b, final int byteArrayLength, final int offset, final int length) {
-        final WritableBuffer buffer = (WritableBuffer)createBuffer(new byte[byteArrayLength], offset, length);
+        final ReadWriteBuffer buffer = (ReadWriteBuffer)createBuffer(new byte[byteArrayLength], offset, length);
         buffer.zeroOut((byte)b);
         final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < length; ++i) {
@@ -253,7 +253,7 @@ public abstract class AbstractWritableBufferTest extends AbstractReadableBufferT
     @Test
     public void testBuild() throws Exception {
         final int capacity = 100;
-        final WritableBuffer buffer = createWritableBuffer(capacity);
+        final ReadWriteBuffer buffer = createWritableBuffer(capacity);
         buffer.write("hello world");
 
         // build it and make sure that the new buffer is indeed 100% immutble
@@ -283,7 +283,7 @@ public abstract class AbstractWritableBufferTest extends AbstractReadableBufferT
 
     @Test
     public void testSetUnsignedInt() {
-        final WritableBuffer buffer = (WritableBuffer)createBuffer(new byte[100]);
+        final ReadWriteBuffer buffer = (ReadWriteBuffer)createBuffer(new byte[100]);
         buffer.setUnsignedInt(0, 100);
         assertThat(buffer.getUnsignedInt(0), is(100L));
         assertThat(buffer.readUnsignedInt(), is(100L));
@@ -291,7 +291,7 @@ public abstract class AbstractWritableBufferTest extends AbstractReadableBufferT
 
     @Test
     public void testSetInt() {
-        final WritableBuffer buffer = (WritableBuffer)createBuffer(new byte[100]);
+        final ReadWriteBuffer buffer = (ReadWriteBuffer)createBuffer(new byte[100]);
         buffer.setInt(0, 100);
         assertThat(buffer.getInt(0), is(100));
         assertThat(buffer.readInt(), is(100));
@@ -302,7 +302,7 @@ public abstract class AbstractWritableBufferTest extends AbstractReadableBufferT
 
     @Test
     public void writeNumbers() {
-        final WritableBuffer buffer = (createWritableBuffer(100));
+        final ReadWriteBuffer buffer = createWritableBuffer(100);
         buffer.write(567);
         buffer.write(789);
         buffer.write(Integer.MAX_VALUE);
@@ -337,7 +337,7 @@ public abstract class AbstractWritableBufferTest extends AbstractReadableBufferT
      * Helper method to ensure that if the operation is performed, we blow up on an {@link IllegalArgumentException}
      *
      */
-    private static void ensureDoesntWork(final WritableBuffer b, final Consumer<WritableBuffer> operation) {
+    private static void ensureDoesntWork(final ReadWriteBuffer b, final Consumer<ReadWriteBuffer> operation) {
         try {
             operation.accept(b);
             fail("Expected to blow up on a " + IndexOutOfBoundsException.class.getName());

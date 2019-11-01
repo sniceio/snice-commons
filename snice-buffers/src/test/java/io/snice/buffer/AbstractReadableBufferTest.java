@@ -777,14 +777,14 @@ public abstract class AbstractReadableBufferTest extends AbstractBufferTest {
     @Test
     public void testClone() throws Exception {
         final Buffer buffer = Buffers.wrap(allocateByteArray(100));
-        final Buffer clone = buffer.clone();
+        final Buffer clone = (Buffer)buffer.clone();
         assertBuffers(buffer, clone);
 
         // make sure that cloning slices are also
         // correct
         final Buffer slice = clone.slice(30, 40);
         assertThat(slice.getByte(0), is((byte) 30));
-        final Buffer sliceClone = slice.clone();
+        final Buffer sliceClone = (Buffer)slice.clone();
         assertBuffers(sliceClone, slice);
     }
 

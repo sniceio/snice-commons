@@ -759,7 +759,7 @@ public interface Buffer {
      *
      * @return
      */
-    Buffer clone();
+    Object clone();
 
     /**
      * Check whether to buffers are considered to be equal.

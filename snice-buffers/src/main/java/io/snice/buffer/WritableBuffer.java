@@ -4,12 +4,9 @@ import io.snice.buffer.impl.DefaultWritableBuffer;
 
 import java.io.UnsupportedEncodingException;
 
-import static io.snice.preconditions.PreConditions.assertArray;
-
-public interface WritableBuffer extends ReadableBuffer {
+public interface WritableBuffer {
 
     static WritableBuffer of(final byte... buffer) {
-        assertArray(buffer);
         return DefaultWritableBuffer.of(buffer);
     }
 
@@ -55,6 +52,25 @@ public interface WritableBuffer extends ReadableBuffer {
     void setBit7(int index, boolean on) throws IndexOutOfBoundsException;
 
     /**
+     * <p>
+     * The capacity of this buffer.
+     * </p>
+     *
+     * <p>
+     *     Note that the capacity is not affected by where the writer index is, however, it may be that
+     *     there are bytes that yet has to have anything written to them and as such, a portion
+     *     of your {@link WritableBuffer} may still be "empty".
+     *
+     *     So, capacity essentially checks the underlying byte-array and how large it is, or rather, how
+     *     large the view of the underlying buffer is.
+     * </p>
+     *
+     * <p>
+     * @return
+     */
+    int capacity();
+
+    /**
      * Set the byte at given index to a new value
      *
      * @param index
@@ -74,15 +90,7 @@ public interface WritableBuffer extends ReadableBuffer {
     int getWriterIndex();
 
     /**
-     * Set the writer index of this buffer. Note that this will also affect the reader
-     * index in the following way.
-     *
-     * If the current reader index is greater than the given index, it will too be set to the same
-     * index. Hence, you will end up with no more readable bytes (because we just said by setting the
-     * writer index back a bit that we "lost" those bytes, as in we haven't written to them yet, hence
-     * they are no longer readable).
-     *
-     * If the current reader index is less than the given index, it is left untouched.
+     * Set the writer index of this buffer.
      *
      * @param index
      */
@@ -177,11 +185,10 @@ public interface WritableBuffer extends ReadableBuffer {
      * have the byte 'a' in it (so 97). However, you also restrict the view when creating this {@link WritableBuffer} to
      * only see the 50 in the middle then the lower boundary will be set to 50
      * and the upper boundary will be set to 100. When you call {@link #zeroOut()} you will zero out
-     * your view, which in this example would be bytes 50 (inclusive) to 100 (exclusive).
+     * your view, which in this example would be byte 50 (inclusive) to byte 100 (exclusive).
      * The rest will be left untouched.
      *
      * See unit tests for this to see "live" examples.
-     *
      */
     void zeroOut();
 
@@ -198,8 +205,7 @@ public interface WritableBuffer extends ReadableBuffer {
      *
      * @return
      */
-    @Override
-    WritableBuffer clone();
+    Object clone();
 
     /**
      * Depending on the use case, you may find yourself creating a {@link WritableBuffer}, write some stuff
