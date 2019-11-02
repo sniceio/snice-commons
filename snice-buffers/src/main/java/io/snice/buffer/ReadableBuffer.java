@@ -71,9 +71,18 @@ public interface ReadableBuffer extends Buffer {
      *
      * @return the int value
      * @throws IndexOutOfBoundsException
-     *             in case there is not 4 bytes left to read
+     *             in case there are not 4 bytes left to read
      */
     int readInt() throws IndexOutOfBoundsException;
+
+    /**
+     * Read only three octets from the underlying byte-stream and return it as n integer.
+     * The reader index of this buffer will be increased by 3.
+     *
+     * @throws IndexOutOfBoundsException
+     *             in case there are not 3 bytes left to read
+     */
+    int readIntFromThreeOctets() throws IndexOutOfBoundsException;
 
     /**
      * Read a long and will increase the reader index of this buffer by 8

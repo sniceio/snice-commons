@@ -82,6 +82,12 @@ public final class PreConditions {
         }
     }
 
+    public static void assertArgument(final boolean expression) throws IllegalArgumentException {
+        if (!expression) {
+            throw new IllegalArgumentException();
+        }
+    }
+
     // ----------------------------------------------------------------------
     // ----------------------------------------------------------------------
     // ---------------------- Assert Methods for Arrays ---------------------

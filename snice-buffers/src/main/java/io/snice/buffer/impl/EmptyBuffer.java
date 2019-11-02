@@ -131,6 +131,11 @@ public class EmptyBuffer implements ReadableBuffer {
     }
 
     @Override
+    public void writeTo(final WritableBuffer out) {
+        // we're an empty buffer so nothing to write...
+    }
+
+    @Override
     public int indexOf(final byte b) throws ByteNotFoundException, IllegalArgumentException {
         return -1;
     }
@@ -248,6 +253,11 @@ public class EmptyBuffer implements ReadableBuffer {
 
     @Override
     public int readInt() throws IndexOutOfBoundsException {
+        throw new IndexOutOfBoundsException(NOT_ENOUGH_READABLE_BYTES);
+    }
+
+    @Override
+    public int readIntFromThreeOctets() throws IndexOutOfBoundsException {
         throw new IndexOutOfBoundsException(NOT_ENOUGH_READABLE_BYTES);
     }
 

@@ -114,17 +114,6 @@ public interface Buffer {
     }
 
     static long signedLong(final byte a, final byte b, final byte c, final byte d, final byte e, final byte f, final byte g, final byte h) {
-        /*
-        return (long)(a << 56)
-                | (long)(b & 0xff) << 48
-                | (long)(c & 0xff) << 40
-                | (long)(d & 0xff) << 32
-                | (long)(e & 0xff) << 24
-                | (long)(f & 0xff) << 16
-                | (long)(g & 0xff) << 8
-                | (long)(h & 0xff) << 0;
-
-         */
 
         // from DataInputStream.readLong
         return (((long)a << 56) +
@@ -148,7 +137,6 @@ public interface Buffer {
     static int signedInt(final byte a, final byte b, final byte c) {
         return (a & 0xff) << 16 | (b & 0xff) << 8 | c & 0xff;
     }
-
 
     /**
      * Helper method to convert a byte into a binary string.
@@ -438,8 +426,8 @@ public interface Buffer {
      * <p>
      *     For the default immutable {@link Buffer}, the result of this operation will always be
      *     the same, i.e., the content will never change and as such, you will get the same result
-     *     every time. However, for the {@link ReadableBuffer} and, in particular, for the {@link WritableBuffer}, this
-     *     is not necessarily true since they both are mutable.
+     *     every time. However, for the {@link ReadableBuffer} and this
+     *     is not necessarily true since the {@link ReadableBuffer} is mutable (the reader index changes)
      * </p>
      *
      * <p>
@@ -447,22 +435,26 @@ public interface Buffer {
      *     essentially consuming that data and in everything before it is discarded. Therefore, whenever you issue
      *     a {@link #writeTo(OutputStream)} and in between those calls you have also done a few <code>readXXX</code>
      *     operations, the amount of data written to the {@link OutputStream} will be less than last time.
-     *     This behaviour is also consistent with how {@link #toString()} works for the {@link ReadableBuffer}.
      * </p>
-     *
-     * <p>
-     *     <b>{@link WritableBuffer}:</b> Since the writable buffer can add more data to the buffer, as well as
-     *     changing existing data "in the middle", it should not come as a surprise that multiple calls to
-     *     link {@link #writeTo(OutputStream)}} will likely yield different results. Also, since this buffer is
-     *     an extension to the {@link ReadableBuffer}, the beviour regarding reading also applies to this writable
-     *     buffer, which is of course consistent with how {@link #toString()} works for the {@link WritableBuffer}
-     *     as well.
-     * </p>
-     *
      *
      * @param out
      */
     void writeTo(OutputStream out) throws IOException;
+
+    /**
+     * <p>
+     *     Write the content of this {@link Buffer} to the {@link WritableBuffer}.
+     * </p>
+     *
+     * <p>
+     *     See the notes regarding the behavior for the {@link ReadableBuffer}, since that
+     *     applies to this method just as much.
+     * </p>
+     *
+     * @param out
+     * @throws IOException
+     */
+    void writeTo(WritableBuffer out);
 
     /**
      * Get a slice of the buffer starting at <code>start</code> (inclusive)

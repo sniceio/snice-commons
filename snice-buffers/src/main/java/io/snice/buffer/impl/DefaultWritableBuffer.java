@@ -127,6 +127,17 @@ public final class DefaultWritableBuffer implements WritableBuffer {
     }
 
     @Override
+    public void setThreeOctetInt(final int index, final int value) throws IndexOutOfBoundsException {
+        assertNotDone();
+        checkIndex(index);
+        checkIndex(index + 2);
+        final int i = lowerBoundary + index;
+        buffer[i + 0] = (byte) (value >>> 16);
+        buffer[i + 1] = (byte) (value >>> 8);
+        buffer[i + 2] = (byte) value;
+    }
+
+    @Override
     public void setBit(final int index, final int bitNo, final boolean on) throws IndexOutOfBoundsException {
         assertNotDone();
         checkIndex(index);
@@ -191,6 +202,7 @@ public final class DefaultWritableBuffer implements WritableBuffer {
         return writerIndex;
     }
 
+
     @Override
     public void setWriterIndex(final int index) {
         assertNotDone();
@@ -223,14 +235,20 @@ public final class DefaultWritableBuffer implements WritableBuffer {
 
     @Override
     public void write(final byte[] bytes) throws IndexOutOfBoundsException{
+        write(bytes, 0, bytes.length);
+    }
+
+    @Override
+    public void write(final byte[] bytes, final int offset, final int length) throws IndexOutOfBoundsException {
         assertNotDone();
-        if (!checkWritableBytesSafe(bytes.length)) {
+        if (!checkWritableBytesSafe(length)) {
             throw new IndexOutOfBoundsException("Unable to write the entire String to this buffer. Nothing was written");
         }
 
-        System.arraycopy(bytes, 0, buffer, writerIndex, bytes.length);
-        writerIndex += bytes.length;
+        System.arraycopy(bytes, offset, buffer, writerIndex, length);
+        writerIndex += length;
     }
+
 
     @Override
     public void write(final int value) throws IndexOutOfBoundsException{
@@ -244,6 +262,20 @@ public final class DefaultWritableBuffer implements WritableBuffer {
         buffer[index + 2] = (byte) (value >>> 8);
         buffer[index + 3] = (byte) value;
         writerIndex += 4;
+    }
+
+    @Override
+    public void writeThreeOctets(final int value) throws IndexOutOfBoundsException {
+        assertNotDone();
+        if (!checkWritableBytesSafe(3)) {
+            throw new IndexOutOfBoundsException("Unable to write the entire three octet int to this buffer. Nothing was written");
+        }
+        assertArgument(value >= 0);
+        final int i = lowerBoundary + writerIndex;
+        buffer[i + 0] = (byte) (value >>> 16);
+        buffer[i + 1] = (byte) (value >>> 8);
+        buffer[i + 2] = (byte) value;
+        writerIndex += 3;
     }
 
     @Override

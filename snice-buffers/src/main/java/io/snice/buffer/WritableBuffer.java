@@ -24,6 +24,20 @@ public interface WritableBuffer {
     void setInt(int index, int value) throws IndexOutOfBoundsException;
 
     /**
+     * Store the given value in three octets only. Only the three lowest octets from
+     * the integer will be stored.
+     *
+     * See {@link #writeThreeOctets(int)} on why negative numbers are not allowed.
+     *
+     * @param index the index
+     * @param value the integer value to store at the given index.
+     * @throws IndexOutOfBoundsException
+     * @throws IllegalArgumentException in case the value is negative.
+     */
+    void setThreeOctetInt(int index, int value) throws IndexOutOfBoundsException, IllegalArgumentException;
+
+
+    /**
      * Turn the bit within the given byte on or off.
      *
      * @param index the index of the byte
@@ -90,6 +104,30 @@ public interface WritableBuffer {
     int getWriterIndex();
 
     /**
+     * There are times when you create a new {@link WritableBuffer} with an existing byte-array
+     * and that array has already been written to and perhaps you only wish to make some modifications
+     * in the middle and as such, you will use the various set-methods instead, such as
+     * {@link WritableBuffer#setUnsignedInt(int, long)} and then perhaps you {@link WritableBuffer#build()}
+     * the buffer again to "lock" it in place. In those cases,  you actually want to set the writer index
+     * to the very last position or when you build it, the {@link WritableBuffer} will not include
+     * any of your changes (or anything actually) since it believes nothing was written to it. So,
+     * in these cases, you want to fast-forward the writer index to the very last position. This method
+     * does that.
+     */
+    default void fastForwardWriterIndex() {
+        setWriterIndex(capacity());
+    }
+
+    /**
+     * Convenience method for rewiding the writer index back to the beginning. Same as setting
+     * the {@link #setWriterIndex(int)} to zero. The main reason for this method is just
+     * to be consistent with the {@link #fastForwardWriterIndex()}.
+     */
+    default void rewindWriterIndex() {
+        setWriterIndex(0);
+    }
+
+    /**
      * Set the writer index of this buffer.
      *
      * @param index
@@ -122,7 +160,24 @@ public interface WritableBuffer {
 
     void write(byte[] bytes) throws IndexOutOfBoundsException;
 
+    void write(byte[] bytes, int offset, int length) throws IndexOutOfBoundsException;
+
     void write(int value) throws IndexOutOfBoundsException;
+
+    /**
+     * Only write the three lowest octets of the given integer. Since
+     * ints in java are signed and if you write a negative number but
+     * then cut off the top octet, then you end up with a very large number.
+     * E.g., the number -3 with the top octet cut off will have the following
+     * bits set <code>0b111111111111111111111101</code> which is a very large
+     * number and probably pretty surprising to the user. Therefore, negative
+     * numbers are not allowed.
+     *
+     * @param value
+     * @throws IndexOutOfBoundsException in case there are not enough bytes to write these three octets.
+     * @throws IllegalArgumentException in case you try to write a negative number.
+     */
+    void writeThreeOctets(int value) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     void write(long value) throws IndexOutOfBoundsException;
 

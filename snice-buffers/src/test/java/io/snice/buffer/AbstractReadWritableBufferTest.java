@@ -282,11 +282,48 @@ public abstract class AbstractReadWritableBufferTest extends AbstractReadableBuf
     }
 
     @Test
+    public void testThreeOctetInt() {
+        ensureWriteThreeOctetInt(0);
+        ensureWriteThreeOctetInt(7);
+        ensureWriteThreeOctetInt(10);
+
+        // if we have an int where any of the bits in the top byte is set, those will
+        // effectively cutoff, leaving the lower 24 bits only. So, if we write the
+        // max value, then when we should only have 24 "on" bits left.
+        ensureWriteThreeOctetInt(Integer.MAX_VALUE, 0b111111111111111111111111);
+
+        ensureNegativeNumbersThreeOctetIntsNotPossible(-1); //boundary
+        ensureNegativeNumbersThreeOctetIntsNotPossible(-2);
+        ensureNegativeNumbersThreeOctetIntsNotPossible(Integer.MIN_VALUE); //boundary
+    }
+
+    @Test
     public void testSetUnsignedInt() {
         final ReadWriteBuffer buffer = (ReadWriteBuffer)createBuffer(new byte[100]);
         buffer.setUnsignedInt(0, 100);
         assertThat(buffer.getUnsignedInt(0), is(100L));
         assertThat(buffer.readUnsignedInt(), is(100L));
+    }
+
+    private void ensureNegativeNumbersThreeOctetIntsNotPossible(final int value) {
+        try {
+            final ReadWriteBuffer buffer = createWritableBuffer(100);
+            buffer.writeThreeOctets(value);
+            fail("Expected to fail with an IllegalArgumentException");
+        } catch (final IllegalArgumentException e) {
+            // expected
+        }
+    }
+
+    private void ensureWriteThreeOctetInt(final int value, final int expected) {
+        final ReadWriteBuffer buffer = createWritableBuffer(3);
+        buffer.writeThreeOctets(value);
+        assertThat(buffer.getIntFromThreeOctets(0), is(expected));
+        assertThat(buffer.toReadableBuffer().readIntFromThreeOctets(), is(expected));
+    }
+
+    private void ensureWriteThreeOctetInt(final int value) {
+        ensureWriteThreeOctetInt(value, value);
     }
 
     @Test

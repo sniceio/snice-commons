@@ -144,6 +144,17 @@ public final class DefaultReadWriteBuffer implements ReadWriteBuffer {
     }
 
     @Override
+    public void setThreeOctetInt(final int index, final int value) throws IndexOutOfBoundsException {
+        checkIndex(index);
+        checkIndex(index + 2);
+        assertArgument(value >= 0);
+        final int i = lowerBoundary + index;
+        buffer[i + 0] = (byte) (value >>> 16);
+        buffer[i + 1] = (byte) (value >>> 8);
+        buffer[i + 2] = (byte) value;
+    }
+
+    @Override
     public void setBit(final int index, final int bitNo, final boolean on) throws IndexOutOfBoundsException {
         final int i = lowerBoundary + index;
         checkIndex(i);
@@ -237,12 +248,17 @@ public final class DefaultReadWriteBuffer implements ReadWriteBuffer {
 
     @Override
     public void write(final byte[] bytes) throws IndexOutOfBoundsException{
-        if (!checkWritableBytesSafe(bytes.length)) {
+        write(bytes, 0, bytes.length);
+    }
+
+    @Override
+    public void write(final byte[] bytes, final int offset, final int length) throws IndexOutOfBoundsException {
+        if (!checkWritableBytesSafe(length)) {
             throw new IndexOutOfBoundsException("Unable to write the entire String to this buffer. Nothing was written");
         }
 
-        System.arraycopy(bytes, 0, buffer, writerIndex, bytes.length);
-        writerIndex += bytes.length;
+        System.arraycopy(bytes, offset, buffer, writerIndex, length);
+        writerIndex += length;
     }
 
     @Override
@@ -256,6 +272,19 @@ public final class DefaultReadWriteBuffer implements ReadWriteBuffer {
         buffer[index + 2] = (byte) (value >>> 8);
         buffer[index + 3] = (byte) value;
         writerIndex += 4;
+    }
+
+    @Override
+    public void writeThreeOctets(final int value) throws IndexOutOfBoundsException {
+        if (!checkWritableBytesSafe(3)) {
+            throw new IndexOutOfBoundsException("Unable to write the entire three octet int to this buffer. Nothing was written");
+        }
+        assertArgument(value >= 0);
+        final int i = lowerBoundary + writerIndex;
+        buffer[i + 0] = (byte) (value >>> 16);
+        buffer[i + 1] = (byte) (value >>> 8);
+        buffer[i + 2] = (byte) value;
+        writerIndex += 3;
     }
 
     @Override
@@ -378,6 +407,11 @@ public final class DefaultReadWriteBuffer implements ReadWriteBuffer {
 
     @Override
     public void writeTo(final OutputStream out) throws IOException {
+        wrap.writeTo(out);
+    }
+
+    @Override
+    public void writeTo(final WritableBuffer out) {
         wrap.writeTo(out);
     }
 
@@ -544,6 +578,12 @@ public final class DefaultReadWriteBuffer implements ReadWriteBuffer {
     public int readInt() throws IndexOutOfBoundsException {
         checkReadableBytes(4);
         return wrap.readInt();
+    }
+
+    @Override
+    public int readIntFromThreeOctets() throws IndexOutOfBoundsException {
+        checkReadableBytes(3);
+        return wrap.readIntFromThreeOctets();
     }
 
     @Override

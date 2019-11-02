@@ -56,7 +56,7 @@ public class WritableBufferTest {
     @Test
     public void testSetBits() {
         final WritableBuffer writable = WritableBuffer.of(new byte[100]);
-        writable.setWriterIndex(writable.capacity());
+        writable.fastForwardWriterIndex();
 
         // just making sure that the short-hand versions
         // is actually working.
@@ -90,19 +90,96 @@ public class WritableBufferTest {
         // 97 binary is 1100001, let's set those bits
         // and sure we can read out 97
         final WritableBuffer writable = WritableBuffer.of(new byte[4]);
-        writable.setWriterIndex(4);
+        writable.fastForwardWriterIndex();
         writable.setBit0(3, true);
         writable.setBit5(3, true);
         writable.setBit6(3, true);
 
         final int value = writable.build().getInt(0);
         assertThat(value, is(97));
+    }
+
+    @Test
+    public void testThreeOctetInt() {
+        ensureWriteThreeOctetInt(0);
+        ensureWriteThreeOctetInt(7);
+        ensureWriteThreeOctetInt(10);
+
+        // if we have an int where any of the bits in the top byte is set, those will
+        // effectively cutoff, leaving the lower 24 bits only. So, if we write the
+        // max value, then when we should only have 24 "on" bits left.
+        ensureWriteThreeOctetInt(Integer.MAX_VALUE, 0b111111111111111111111111);
+
+        ensureNegativeNumbersThreeOctetIntsNotPossible(-1); //boundary
+        ensureNegativeNumbersThreeOctetIntsNotPossible(-2);
+        ensureNegativeNumbersThreeOctetIntsNotPossible(Integer.MIN_VALUE); //boundary
+    }
+
+    @Test
+    public void testWriteBufferToWritable() {
+        final WritableBuffer writable = WritableBuffer.of(100);
+        writable.writeAsString(567);
+        Buffers.wrap("hello world").writeTo(writable);
+
+        final Buffer buffer = writable.build();
+        assertThat(buffer.toString(), is("567hello world"));
+    }
+
+    @Test
+    public void testWriteBufferNoSpace() {
+        WritableBuffer writable = WritableBuffer.of(10);
+        ensureNoSpaceToWrite(Buffers.wrap("This is going to be way more than 10 bytes"), writable);
+
+        writable = WritableBuffer.of(10);
+        writable.write(1L); // 8 bytes, only two left
+        ensureNoSpaceToWrite(Buffers.wrap("abc"), writable);
+
+        // test boundary
+        writable = WritableBuffer.of(10);
+        writable.write(1L);
+        Buffers.wrap("ab").writeTo(writable); // should be ok
+        ensureNoSpaceToWrite(Buffers.wrap("c"), writable);
+
+        writable = WritableBuffer.of(1);
+        Buffers.wrap("a").writeTo(writable);
+        ensureNoSpaceToWrite(Buffers.wrap("b"), writable);
+
+        writable = WritableBuffer.of(1);
+        ensureNoSpaceToWrite(Buffers.wrap("ab"), writable);
 
     }
 
-    private static void ensureBits(final WritableBuffer writable, final int index) {
+    private static void ensureNoSpaceToWrite(final Buffer buffer, final WritableBuffer writable) {
+        try {
+            buffer.writeTo(writable);
+            fail("Expected to blow up on a " + IndexOutOfBoundsException.class.getName());
+        } catch (final IndexOutOfBoundsException e) {
+            // expected
+        }
     }
 
+
+    private static void ensureNegativeNumbersThreeOctetIntsNotPossible(final int value) {
+        try {
+            final WritableBuffer writable = WritableBuffer.of(new byte[3]);
+            writable.writeThreeOctets(value);
+            fail("Expected to fail with an IllegalArgumentException");
+        } catch (final IllegalArgumentException e) {
+            // expected
+        }
+    }
+
+    private static void ensureWriteThreeOctetInt(final int value, final int expected) {
+        final WritableBuffer writable = WritableBuffer.of(new byte[3]);
+        writable.writeThreeOctets(value);
+        final Buffer buffer = writable.build();
+        assertThat(buffer.getIntFromThreeOctets(0), is(expected));
+        assertThat(buffer.toReadableBuffer().readIntFromThreeOctets(), is(expected));
+    }
+
+    private static void ensureWriteThreeOctetInt(final int value) {
+        ensureWriteThreeOctetInt(value, value);
+    }
 
     private static void ensureAllBits(final Buffer buffer, final int index, final boolean on) {
         for (int bit = 0; bit < 8; ++bit) {
@@ -122,7 +199,7 @@ public class WritableBufferTest {
     private static void ensureZeroOut(final char b, final int byteArrayLength, final int offset, final int length) {
         final WritableBuffer writable = WritableBuffer.of(new byte[byteArrayLength], offset, length);
         writable.zeroOut((byte)b);
-        writable.setWriterIndex(length);
+        writable.fastForwardWriterIndex();
         final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < length; ++i) {
             sb.append(b);

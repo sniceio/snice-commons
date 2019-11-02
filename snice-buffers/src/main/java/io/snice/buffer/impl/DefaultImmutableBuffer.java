@@ -86,7 +86,10 @@ public class DefaultImmutableBuffer implements Buffer {
 
     @Override
     public WritableBuffer toWritableBuffer() {
-        throw new RuntimeException("Not implemented yet");
+        final int capacity = capacity();
+        final byte[] copy = new byte[capacity];
+        System.arraycopy(buffer, lowerBoundary, copy, 0, capacity);
+        return WritableBuffer.of(copy);
     }
 
     @Override
@@ -165,6 +168,12 @@ public class DefaultImmutableBuffer implements Buffer {
 
     @Override
     public void writeTo(final OutputStream out) throws IOException {
+        final int length = getReadableBytes();
+        out.write(buffer, lowerBoundary, length);
+    }
+
+    @Override
+    public void writeTo(final WritableBuffer out) {
         final int length = getReadableBytes();
         out.write(buffer, lowerBoundary, length);
     }
