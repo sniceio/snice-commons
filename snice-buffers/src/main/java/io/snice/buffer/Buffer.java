@@ -789,5 +789,25 @@ public interface Buffer {
     @Override
     String toString();
 
+    /**
+     * TBCD (Telephony Binary Coded Decimal - https://en.wikipedia.org/wiki/Binary-coded_decimal#Telephony_Binary_Coded_Decimal)
+     * is a special encoded specified by 3GPP.
+     *
+     */
+    default String toTBCD() {
+        // note: not 100% correct at this point in time.
+        // haven't taken care of *#abcd just yet
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < capacity(); ++i) {
+            final byte b = getByte(i);
+            final int i1 = (b & 0xF0) >> 4;
+            final int i2 = b & 0x0F;
+            sb.append(i2);
+            sb.append(i1);
+        }
+        return sb.toString();
+    }
+
+
     String toUTF8String();
 }
