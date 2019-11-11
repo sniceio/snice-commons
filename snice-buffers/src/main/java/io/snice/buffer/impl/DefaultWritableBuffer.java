@@ -3,11 +3,13 @@ package io.snice.buffer.impl;
 import io.snice.buffer.Buffer;
 import io.snice.buffer.Buffers;
 import io.snice.buffer.WritableBuffer;
+import io.snice.preconditions.PreConditions;
 
 import java.io.UnsupportedEncodingException;
 
 import static io.snice.preconditions.PreConditions.assertArgument;
 import static io.snice.preconditions.PreConditions.assertArray;
+import static io.snice.preconditions.PreConditions.assertNotNull;
 
 public final class DefaultWritableBuffer implements WritableBuffer {
 
@@ -249,6 +251,11 @@ public final class DefaultWritableBuffer implements WritableBuffer {
         writerIndex += length;
     }
 
+    @Override
+    public void write(final Buffer value) throws IndexOutOfBoundsException{
+        assertNotNull(value, "Cannot write the content of a null buffer");
+        value.writeTo(this);
+    }
 
     @Override
     public void write(final int value) throws IndexOutOfBoundsException{

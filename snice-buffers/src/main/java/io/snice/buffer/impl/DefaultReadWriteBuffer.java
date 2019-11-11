@@ -14,6 +14,7 @@ import java.util.Objects;
 
 import static io.snice.preconditions.PreConditions.assertArgument;
 import static io.snice.preconditions.PreConditions.assertArray;
+import static io.snice.preconditions.PreConditions.assertNotNull;
 
 public final class DefaultReadWriteBuffer implements ReadWriteBuffer {
 
@@ -259,6 +260,12 @@ public final class DefaultReadWriteBuffer implements ReadWriteBuffer {
 
         System.arraycopy(bytes, offset, buffer, writerIndex, length);
         writerIndex += length;
+    }
+
+    @Override
+    public void write(final Buffer value) throws IndexOutOfBoundsException {
+        assertNotNull(value, "Cannot write the content of a null buffer");
+        value.writeTo(this);
     }
 
     @Override

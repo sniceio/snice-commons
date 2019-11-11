@@ -162,6 +162,8 @@ public interface WritableBuffer {
 
     void write(byte[] bytes, int offset, int length) throws IndexOutOfBoundsException;
 
+    void write(Buffer value) throws IndexOutOfBoundsException;
+
     void write(int value) throws IndexOutOfBoundsException;
 
     /**
