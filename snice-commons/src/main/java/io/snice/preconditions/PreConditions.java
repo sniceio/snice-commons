@@ -3,6 +3,8 @@
  */
 package io.snice.preconditions;
 
+import java.util.Collection;
+
 /**
  * Contains common checks for null etc.
  *
@@ -70,6 +72,17 @@ public final class PreConditions {
     }
 
     public static String assertNotEmpty(final String reference, final String msg) throws IllegalArgumentException {
+        if (reference == null || reference.isEmpty()) {
+            throw new IllegalArgumentException(msg);
+        }
+        return reference;
+    }
+
+    public static <T>  Collection<T> assertCollectionNotEmpty(final Collection<T> reference) throws IllegalArgumentException {
+        return assertCollectionNotEmpty(reference, "The argument cannot be null or an empty collection");
+    }
+
+    public static <T>  Collection<T> assertCollectionNotEmpty(final Collection<T> reference, final String msg) throws IllegalArgumentException {
         if (reference == null || reference.isEmpty()) {
             throw new IllegalArgumentException(msg);
         }
