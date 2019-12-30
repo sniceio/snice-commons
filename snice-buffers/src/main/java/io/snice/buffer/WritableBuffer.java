@@ -104,7 +104,7 @@ public interface WritableBuffer {
     int getWriterIndex();
 
     /**
-     * There are times when you create a new {@link WritableBuffer} with an existing byte-array
+     * There are times when you of a new {@link WritableBuffer} with an existing byte-array
      * and that array has already been written to and perhaps you only wish to make some modifications
      * in the middle and as such, you will use the various set-methods instead, such as
      * {@link WritableBuffer#setUnsignedInt(int, long)} and then perhaps you {@link WritableBuffer#build()}
@@ -267,7 +267,7 @@ public interface WritableBuffer {
     /**
      * Depending on the use case, you may find yourself creating a {@link WritableBuffer}, write some stuff
      * and then "freeze" it in place so no other modifications can be made to it. One way to accomplish that is to
-     * use the method {@link #toBuffer()}, which in the context of the {@link WritableBuffer} will create
+     * use the method {@link #toBuffer()}, which in the context of the {@link WritableBuffer} will of
      * an immutable {@link Buffer} by copying the entire underlying byte-array (only the portion that has been
      * written to of course). This would achieve a thread safe 100% immutable buffer that you can safely pass around
      * and be certain no harm can come to it.

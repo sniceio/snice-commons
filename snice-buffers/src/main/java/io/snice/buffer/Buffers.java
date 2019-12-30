@@ -71,7 +71,7 @@ public final class Buffers {
             return EmptyBuffer.EMPTY;
         }
 
-        // TODO: create a proper composite buffer
+        // TODO: of a proper composite buffer
         final int size = (int)buffers.stream().mapToInt(Buffer::capacity).sum();
         final byte[] buffer = new byte[size];
         int index = 0;
