@@ -18,9 +18,19 @@ public class RequestSupport<O, T> extends TransactionSupport<O, T> implements Re
         super(TransactionId.generateDefault(), owner);
     }
 
+    protected RequestSupport(final O owner, final T payload) {
+        super(TransactionId.generateDefault(), owner, Optional.of(payload));
+    }
+
     public static <O> RequestSupport<O, Object> create(final O owner) {
         assertNotNull(owner);
         return new RequestSupport<>(owner);
+    }
+
+    public static <O, T> RequestSupport<O, T> create(final O owner, final T payload) {
+        assertNotNull(owner);
+        assertNotNull(payload);
+        return new RequestSupport<>(owner, payload);
     }
 
     public static <O, T> BuilderSupport<O, T> of(final O owner, final T payload) {

@@ -17,7 +17,7 @@ public class TransactionTest {
     private TransactionId transactionId;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         transactionId = mock(TransactionId.class);
         request = RequestSupport.of("bill").withTransactionId(transactionId).build();
     }
@@ -44,7 +44,7 @@ public class TransactionTest {
     public void testCreator() {
         assertRequest(RequestSupport.create("alice"), "alice");
     }
-    
+
     @Test
     public void testSpecifTransactionId() {
         assertThat(request.getOwner(), is("bill"));
