@@ -47,6 +47,11 @@ public abstract class AbstractBufferTest {
         assertThat(Buffers.wrap(-123).toString(), is("-123"));
     }
 
+    @Test
+    public void testConvertToIpv4String() {
+        final Buffer b = Buffers.wrap((byte)0x00, (byte)0x01, (byte)0xac, (byte)0x16, (byte)0x12, (byte)0x78, (byte)0xaa);
+        assertThat(b.toIPv4String(2), is("172.22.18.120"));
+    }
 
     @Test
     public void testCreateWithOffsetAndLength() {

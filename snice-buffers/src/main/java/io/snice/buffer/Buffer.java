@@ -1,6 +1,7 @@
 package io.snice.buffer;
 
 import io.snice.buffer.impl.DefaultImmutableBuffer;
+import io.snice.net.IPv4;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -806,6 +807,22 @@ public interface Buffer {
             sb.append(i1);
         }
         return sb.toString();
+    }
+
+    /**
+     * Interpret the 4 bytes at the given index as an IPv4 address and return
+     * it as a human readable string.
+     *
+     * @param index
+     * @return
+     */
+    default String toIPv4String(final int index) {
+        final byte a = getByte(index + 0);
+        final byte b = getByte(index + 1);
+        final byte c = getByte(index + 2);
+        final byte d = getByte(index + 3);
+
+        return IPv4.convertToStringIP(a, b, c, d);
     }
 
 

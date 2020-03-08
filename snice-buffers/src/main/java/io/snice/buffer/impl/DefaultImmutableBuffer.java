@@ -5,6 +5,7 @@ import io.snice.buffer.Buffer;
 import io.snice.buffer.ByteNotFoundException;
 import io.snice.buffer.ReadableBuffer;
 import io.snice.buffer.WritableBuffer;
+import io.snice.net.IPv4;
 import io.snice.preconditions.PreConditions;
 
 import java.io.IOException;
@@ -222,12 +223,19 @@ public class DefaultImmutableBuffer implements Buffer {
     }
 
     @Override
+    public String toIPv4String(final int index) {
+        final int i = lowerBoundary + index;
+        checkIndex(i);
+        checkIndex(i + 3);
+        return IPv4.convertToStringIP(buffer[i], buffer[i + 1], buffer[i + 2], buffer[i + 3]);
+    }
+
+    @Override
     public long getLong(final int index) throws IndexOutOfBoundsException {
         final int i = lowerBoundary + index;
         checkIndex(i);
         checkIndex(i + 7);
         return Buffer.signedLong(buffer[i], buffer[i + 1], buffer[i + 2], buffer[i + 3], buffer[i + 4], buffer[i + 5], buffer[i + 6], buffer[i + 7]);
-        // return Buffer.signedLong(buffer[i + 7], buffer[i + 6], buffer[i + 5], buffer[i + 4], buffer[i + 3], buffer[i + 2], buffer[i + 1], buffer[i + 0]);
     }
 
     @Override

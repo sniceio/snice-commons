@@ -2,6 +2,7 @@ package io.snice.buffer;
 
 import io.snice.buffer.impl.DefaultImmutableBuffer;
 import io.snice.buffer.impl.EmptyBuffer;
+import io.snice.net.IPv4;
 
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -83,6 +84,19 @@ public final class Buffers {
 
         return Buffers.wrap(buffer);
     }
+
+    /**
+     * Assume that the given string is an IPv4 address (i.e. a.b.c.d such as 10.36.10.10)
+     * and return a buffer containing that IPv4 address encoded as a 32 bit value.
+     *
+     * @param ipv4
+     * @return
+     */
+    public static Buffer wrapAsIPv4(final String ipv4) {
+        final byte[] b = IPv4.fromString(ipv4);
+        return DefaultImmutableBuffer.of(b);
+    }
+
     /**
      * Converts the integer value into a string and that is what is being
      * wrapped in a {@link Buffer}
