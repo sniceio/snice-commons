@@ -185,6 +185,22 @@ public class DefaultImmutableBuffer implements Buffer {
     }
 
     @Override
+    public int countOccurences(final int startIndex, final int maxBytes, final byte b) throws IllegalArgumentException {
+        checkIndex(lowerBoundary + startIndex);
+        final int capacity = capacity();
+        final int stop = Math.min(lowerBoundary + startIndex + maxBytes, lowerBoundary + capacity);
+        int count = 0;
+
+        for (int i = lowerBoundary + startIndex; i < stop; ++i) {
+            if (buffer[i] == b) {
+                ++count;
+            }
+        }
+
+        return count;
+    }
+
+    @Override
     public Buffer slice(final int start, final int stop) throws IndexOutOfBoundsException, IllegalArgumentException {
         PreConditions.assertArgument(start >= 0, "The start index must be greater than zero");
         PreConditions.assertArgument(stop >= start, "The stop index (" + stop + ") must be greater or equal " +

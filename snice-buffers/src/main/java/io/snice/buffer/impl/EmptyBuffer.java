@@ -141,6 +141,11 @@ public class EmptyBuffer implements ReadableBuffer {
     }
 
     @Override
+    public int countOccurences(final int startIndex, final int maxbytes, final byte b) throws IllegalArgumentException {
+        return 0;
+    }
+
+    @Override
     public Buffer slice(final int start, final int stop) throws IndexOutOfBoundsException, IllegalArgumentException {
         if (start != 0 && stop != 0) {
             throw new IndexOutOfBoundsException(THIS_BUFFER_IS_EMPTY);

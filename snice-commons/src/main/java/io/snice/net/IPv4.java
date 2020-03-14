@@ -68,6 +68,5 @@ public class IPv4 {
         dst[offset + 3] = (byte) Short.parseShort(parts[3]);
 
         return dst;
-
     }
 }

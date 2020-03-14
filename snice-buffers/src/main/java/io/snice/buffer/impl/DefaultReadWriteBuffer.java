@@ -413,6 +413,11 @@ public final class DefaultReadWriteBuffer implements ReadWriteBuffer {
     }
 
     @Override
+    public int countOccurences(int startIndex, int maxbytes, byte b) throws IllegalArgumentException {
+        return wrap.countOccurences(startIndex, maxbytes, b);
+    }
+
+    @Override
     public void writeTo(final OutputStream out) throws IOException {
         wrap.writeTo(out);
     }

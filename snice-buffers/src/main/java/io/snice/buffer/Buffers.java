@@ -97,6 +97,14 @@ public final class Buffers {
         return DefaultImmutableBuffer.of(b);
     }
 
+    public static boolean isNullOrEmpty(final Buffer buffer) {
+        return buffer == null || buffer.isEmpty();
+    }
+
+    public static boolean isNotNullOrEmpty(final Buffer buffer) {
+        return buffer != null && !buffer.isEmpty();
+    }
+
     /**
      * Converts the integer value into a string and that is what is being
      * wrapped in a {@link Buffer}

@@ -1,10 +1,13 @@
 package io.snice.buffer;
 
+import io.snice.buffer.impl.EmptyBuffer;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -51,6 +54,24 @@ public abstract class AbstractBufferTest {
     public void testConvertToIpv4String() {
         final Buffer b = Buffers.wrap((byte)0x00, (byte)0x01, (byte)0xac, (byte)0x16, (byte)0x12, (byte)0x78, (byte)0xaa);
         assertThat(b.toIPv4String(2), is("172.22.18.120"));
+    }
+
+    @Test
+    public void testIsNullOrEmpty() {
+        assertThat(Buffers.isNullOrEmpty(null), is(true));
+        assertThat(Buffers.isNullOrEmpty(createBuffer("")), is(true));
+        assertThat(Buffers.isNullOrEmpty(EmptyBuffer.EMPTY), is(true));
+
+        assertThat(Buffers.isNullOrEmpty(createBuffer(" ")), is(false));
+    }
+
+    @Test
+    public void testIsNotNullOrEmpty() {
+        assertThat(Buffers.isNotNullOrEmpty(null), is(false));
+        assertThat(Buffers.isNotNullOrEmpty(createBuffer("")), is(false));
+        assertThat(Buffers.isNotNullOrEmpty(EmptyBuffer.EMPTY), is(false));
+
+        assertThat(Buffers.isNotNullOrEmpty(createBuffer(" ")), is(true));
     }
 
     @Test
@@ -237,6 +258,133 @@ public abstract class AbstractBufferTest {
         // indexOf should not affect the reader index so
         // everything should still be there.
         assertThat(buffer.toString(), is("hello world ena goa grejor"));
+    }
+
+    @Test
+    public void testCountOccurances() {
+        final Buffer buffer = createBuffer("127.0.0.1");
+        assertThat(buffer.countOccurences('.'), is(3));
+
+        ensureCountOccurances(3, '.', "127.0.0.1", 3);
+
+        // start after the first .
+        ensureCountOccurances(4, '.', "127.0.0.1", 2);
+
+        // boundary testing.
+        ensureCountOccurances(7, '.', "127.0.0.1", 1);
+        ensureCountOccurances(8, '.', "127.0.0.1", 0);
+
+        try {
+            ensureCountOccurances(9, '.', "127.0.0.1", 0);
+            fail("expected to blow up because we are out of bounds");
+        } catch (final IndexOutOfBoundsException e) {
+            // expected
+        }
+
+    }
+
+    @Test
+    public void testCountOccurancesOnSlices() {
+        final Buffer buffer = createBuffer("127.0.0.1");
+
+        // slice operations...
+        final Buffer slice1 = buffer.slice(3, buffer.capacity());
+        assertThat(slice1.toString(), is(".0.0.1")); // really just to make it easier to read the unit test.
+        assertThat(slice1.countOccurences('.'), is(3));
+        ensureCountOccurances(1, '.', slice1, 2);
+        ensureCountOccurances(5, '.', slice1, 0);
+
+        // slice of the slice
+        final Buffer slice1_1 = slice1.slice(1, 5);
+        assertThat(slice1_1.toString(), is("0.0.")); // really just to make it easier to read the unit test.
+        assertThat(slice1_1.countOccurences('.'), is(2));
+        ensureCountOccurances(1, '.', slice1_1, 2);
+        ensureCountOccurances(2, '.', slice1_1, 1);
+        ensureCountOccurances(3, '.', slice1_1, 1);
+
+        try {
+            ensureCountOccurances(4, '.', slice1_1, 0);
+            fail("expected to blow up because we are out of bounds");
+        } catch (final IndexOutOfBoundsException e) {
+            // expected
+        }
+    }
+
+    /**
+     * Ensure that the max bytes parameter is honored...
+     */
+    @Test
+    public void testCountOccurencesWithMaxBytes() {
+        // this one is 48 characters long.
+        //              (zero indexed)         3    7    13   18   23  27    33   39   44
+        //                                     v    v    v    v    v   v     v     v    v
+        final Buffer buffer = createBuffer("one two three four five six seven eight nine ten");
+
+        // really just to validate that I counted the spaces above correctly...
+        final List<Integer> indices = Arrays.asList(3, 7, 13, 18, 23, 27, 33, 39, 44);
+        for (int i = 0; i < indices.size(); ++i) {
+            final int start = i == 0 ? 0 : indices.get(i - 1) + 1;
+            assertThat(buffer.indexOf(start, 1024, (byte)' '), is(indices.get(i)));
+        }
+
+        ensureCountOccurances(0, ' ', buffer, 9);
+
+        ensureCountOccurances(0, 11, ' ', buffer, 2); // only go to about half way into "three" so two spaces
+        ensureCountOccurances(4, 11 - 4, ' ', buffer, 1); // note that the
+
+        // boundary testing...
+        ensureCountOccurances(2, 0, ' ', buffer, 0); // dumb but allowed
+        ensureCountOccurances(2, 1, ' ', buffer, 0); // only checking the 'e' in "one"
+        ensureCountOccurances(3, 1, ' ', buffer, 1); // now we are "standing" on the first space between "one" and "two"
+        ensureCountOccurances(2, 2, ' ', buffer, 1); // starting from the 'e' in "one", checking 2 bytes, which will include the first space.
+        ensureCountOccurances(33, 2, ' ', buffer, 1); // starting at the white space between seven and eight
+
+        // boundary testing at the end of the array and also
+        // making sure if we go beyond the capacity for "maxbytes" then the
+        // capacity will be used instead.
+        ensureCountOccurances(33, 1000, ' ', buffer, 3);
+        ensureCountOccurances(39, 1000, ' ', buffer, 2);
+        ensureCountOccurances(44, 1000, ' ', buffer, 1);
+        ensureCountOccurances(45, 1000, ' ', buffer, 0);
+        ensureCountOccurances(46, 1000, ' ', buffer, 0);
+        ensureCountOccurances(47, 1000, ' ', buffer, 0);
+
+        try {
+            ensureCountOccurances(48, 1000, ' ', buffer, 0);
+            fail("expected to blow up because we are out of bounds");
+        } catch (final IndexOutOfBoundsException e) {
+            // expected
+        }
+    }
+
+    /**
+     * Ensure that the max bytes parameter is honored even with slices...
+     */
+    @Test
+    public void testCountOccurencesWithMaxBytesOnSlices() {
+        // this one is 48 characters long.
+        //              (zero indexed)         3    7    13   18   23  27    33   39   44
+        //                                     v    v    v    v    v   v     v     v    v
+        final Buffer buffer = createBuffer("one two three four five six seven eight nine ten");
+        final Buffer slice1 = buffer.slice(18, 34); // should contain 4 white spaces
+        assertThat(slice1.toString(), is(" five six seven "));
+        ensureCountOccurances(0, 1000, ' ', slice1, 4);
+        ensureCountOccurances(5, 1000, ' ', slice1, 3);
+        ensureCountOccurances(15, 1000, ' ', slice1, 1); // standing on the last space
+        ensureCountOccurances(15, 1, ' ', slice1, 1);
+    }
+
+    private void ensureCountOccurances(final int start, final char ch, final String s, final int expected) {
+        final Buffer buffer = createBuffer(s);
+        ensureCountOccurances(start, ch, buffer, expected);
+    }
+
+    private static void ensureCountOccurances(final int start, final char ch, final Buffer buffer, final int expected) {
+        ensureCountOccurances(start, 1024, ch, buffer, expected);
+    }
+
+    private static void ensureCountOccurances(final int start, final int max, final char ch, final Buffer buffer, final int expected) {
+        assertThat(buffer.countOccurences(start, max, ch), is(expected));
     }
 
     @Test
