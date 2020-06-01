@@ -388,6 +388,10 @@ public class DefaultReadableBuffer implements ReadableBuffer  {
         return buffer.indexOf(readerIndex, 4096, b);
     }
 
+    @Override
+    public int countOccurences(int startIndex, int maxbytes, byte b) throws IllegalArgumentException {
+        return buffer.countOccurences(startIndex, maxbytes, b);
+    }
 
     @Override
     public void writeTo(final OutputStream out) throws IOException {

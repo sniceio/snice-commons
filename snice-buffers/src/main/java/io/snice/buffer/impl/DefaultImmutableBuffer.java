@@ -5,6 +5,7 @@ import io.snice.buffer.Buffer;
 import io.snice.buffer.ByteNotFoundException;
 import io.snice.buffer.ReadableBuffer;
 import io.snice.buffer.WritableBuffer;
+import io.snice.net.IPv4;
 import io.snice.preconditions.PreConditions;
 
 import java.io.IOException;
@@ -184,6 +185,22 @@ public class DefaultImmutableBuffer implements Buffer {
     }
 
     @Override
+    public int countOccurences(final int startIndex, final int maxBytes, final byte b) throws IllegalArgumentException {
+        checkIndex(lowerBoundary + startIndex);
+        final int capacity = capacity();
+        final int stop = Math.min(lowerBoundary + startIndex + maxBytes, lowerBoundary + capacity);
+        int count = 0;
+
+        for (int i = lowerBoundary + startIndex; i < stop; ++i) {
+            if (buffer[i] == b) {
+                ++count;
+            }
+        }
+
+        return count;
+    }
+
+    @Override
     public Buffer slice(final int start, final int stop) throws IndexOutOfBoundsException, IllegalArgumentException {
         PreConditions.assertArgument(start >= 0, "The start index must be greater than zero");
         PreConditions.assertArgument(stop >= start, "The stop index (" + stop + ") must be greater or equal " +
@@ -222,12 +239,19 @@ public class DefaultImmutableBuffer implements Buffer {
     }
 
     @Override
+    public String toIPv4String(final int index) {
+        final int i = lowerBoundary + index;
+        checkIndex(i);
+        checkIndex(i + 3);
+        return IPv4.convertToStringIP(buffer[i], buffer[i + 1], buffer[i + 2], buffer[i + 3]);
+    }
+
+    @Override
     public long getLong(final int index) throws IndexOutOfBoundsException {
         final int i = lowerBoundary + index;
         checkIndex(i);
         checkIndex(i + 7);
         return Buffer.signedLong(buffer[i], buffer[i + 1], buffer[i + 2], buffer[i + 3], buffer[i + 4], buffer[i + 5], buffer[i + 6], buffer[i + 7]);
-        // return Buffer.signedLong(buffer[i + 7], buffer[i + 6], buffer[i + 5], buffer[i + 4], buffer[i + 3], buffer[i + 2], buffer[i + 1], buffer[i + 0]);
     }
 
     @Override

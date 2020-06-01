@@ -19,7 +19,7 @@ public class EmptyBuffer implements ReadableBuffer {
     public static final Buffer EMPTY = new EmptyBuffer();
 
     private EmptyBuffer() {
-        // only one is really needed to create (well, one per class loader I guess
+        // only one is really needed to of (well, one per class loader I guess
         // will be the actual end result)
     }
 
@@ -138,6 +138,11 @@ public class EmptyBuffer implements ReadableBuffer {
     @Override
     public int indexOf(final byte b) throws ByteNotFoundException, IllegalArgumentException {
         return -1;
+    }
+
+    @Override
+    public int countOccurences(final int startIndex, final int maxbytes, final byte b) throws IllegalArgumentException {
+        return 0;
     }
 
     @Override

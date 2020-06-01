@@ -3,7 +3,6 @@ package io.snice.buffer.impl;
 import io.snice.buffer.Buffer;
 import io.snice.buffer.Buffers;
 import io.snice.buffer.WritableBuffer;
-import io.snice.preconditions.PreConditions;
 
 import java.io.UnsupportedEncodingException;
 
@@ -350,8 +349,11 @@ public final class DefaultWritableBuffer implements WritableBuffer {
 
     @Override
     public WritableBuffer clone() {
-        assertNotDone();
-        throw new RuntimeException("Haven't implemented this just yet");
+        final byte[] bufferCopy = new byte[capacity()];
+        System.arraycopy(buffer, lowerBoundary, bufferCopy, 0, capacity());
+        final DefaultWritableBuffer copy = new DefaultWritableBuffer(bufferCopy, 0, capacity());
+        copy.writerIndex = writerIndex;
+        return copy;
     }
 
 

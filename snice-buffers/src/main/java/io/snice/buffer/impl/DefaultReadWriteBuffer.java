@@ -59,7 +59,7 @@ public final class DefaultReadWriteBuffer implements ReadWriteBuffer {
      * It is assumed that all of the supplied bytes have already been "written" to, i.e., this
      * {@link WritableBuffer} will have no more bytes to write, it is "full".
      *
-     * If you just wish to create a {@link WritableBuffer} that is empty and of a certain
+     * If you just wish to of a {@link WritableBuffer} that is empty and of a certain
      * capacity, then just use the
      *
      * @param buffer
@@ -413,6 +413,11 @@ public final class DefaultReadWriteBuffer implements ReadWriteBuffer {
     }
 
     @Override
+    public int countOccurences(int startIndex, int maxbytes, byte b) throws IllegalArgumentException {
+        return wrap.countOccurences(startIndex, maxbytes, b);
+    }
+
+    @Override
     public void writeTo(final OutputStream out) throws IOException {
         wrap.writeTo(out);
     }
@@ -721,7 +726,7 @@ public final class DefaultReadWriteBuffer implements ReadWriteBuffer {
     }
 
     /**
-     * Whenever we e.g. create a new slice we must copy the current visible buffer, as
+     * Whenever we e.g. of a new slice we must copy the current visible buffer, as
      * depicted by the reader/writer positions since we cannot share the underlying
      * byte-array outside of this {@link WritableBuffer}.
      */

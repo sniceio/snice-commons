@@ -1,6 +1,7 @@
 package io.snice.buffer;
 
 import io.snice.buffer.impl.DefaultImmutableBuffer;
+import io.snice.net.IPv4;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -370,6 +371,10 @@ public interface Buffer {
      */
     int indexOf(int maxBytes, byte... bytes) throws ByteNotFoundException, IllegalArgumentException;
 
+    default int indexOf(byte... bytes) throws ByteNotFoundException, IllegalArgumentException {
+        return indexOf(1024, bytes);
+    }
+
     /**
      *
      *
@@ -417,6 +422,40 @@ public interface Buffer {
      * @throws IllegalArgumentException
      */
     int indexOf(byte b) throws ByteNotFoundException, IllegalArgumentException;
+
+    /**
+     * Count the number of occurences of the given byte.
+     *
+     * @param startIndex the index into the buffer to start scanning
+     * @param maxBytes the maximum number of bytes we'll be checking. Note that this max bytes is
+     *                 the number of bytes we'll be checking and is independent of the start index.
+     *                 So if your start index is 10 and you want to check max 5 elements, then
+     *                 the indeces for this will be start of 10 (inclusive and zero based) to 15 (exclusive)
+     * @param b the byte to check for
+     * @return the number of occurences of given byte.
+     * @throws IndexOutOfBoundsException in case the start index is not within bounds.
+     */
+    int countOccurences(int startIndex, int maxBytes, byte b) throws IndexOutOfBoundsException;
+
+    default int countOccurences(final int startIndex, final int maxBytes, final char b) throws IndexOutOfBoundsException {
+        return countOccurences(startIndex, maxBytes, (byte)b);
+    }
+
+    /**
+     * Same as {@link #countOccurences(int, int, byte)} where the start index is zero and the maximum
+     * bytes is set to 1024.
+     *
+     * @param b
+     * @return
+     * @throws IllegalArgumentException
+     */
+    default int countOccurences(final byte b) throws IndexOutOfBoundsException {
+        return countOccurences(0, 1024, b);
+    }
+
+    default int countOccurences(final char c) throws IndexOutOfBoundsException {
+        return countOccurences((byte)c);
+    }
 
     /**
      * <p>
@@ -806,6 +845,22 @@ public interface Buffer {
             sb.append(i1);
         }
         return sb.toString();
+    }
+
+    /**
+     * Interpret the 4 bytes at the given index as an IPv4 address and return
+     * it as a human readable string.
+     *
+     * @param index
+     * @return
+     */
+    default String toIPv4String(final int index) {
+        final byte a = getByte(index + 0);
+        final byte b = getByte(index + 1);
+        final byte c = getByte(index + 2);
+        final byte d = getByte(index + 3);
+
+        return IPv4.convertToStringIP(a, b, c, d);
     }
 
 

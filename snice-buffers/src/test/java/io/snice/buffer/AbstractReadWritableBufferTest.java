@@ -57,7 +57,7 @@ public abstract class AbstractReadWritableBufferTest extends AbstractReadableBuf
     }
 
     /**
-     * If you create a new {@link WritableBuffer} with a certain capacity it is at that point
+     * If you of a new {@link WritableBuffer} with a certain capacity it is at that point
      * considered "empty" and as such, you should not be able to actually read until you have
      * written to the certain areas.
      */
