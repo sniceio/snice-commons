@@ -11,6 +11,21 @@ import static org.junit.Assert.fail;
 public class WritableBufferTest {
 
     @Test
+    public void testCopyBuffer() {
+        final WritableBuffer buffer = WritableBuffer.of(100);
+        buffer.write("hello world");
+        final WritableBuffer copy = (WritableBuffer)buffer.clone();
+        copy.write(" more");
+
+        final WritableBuffer copy2 = (WritableBuffer)copy.clone();
+        copy2.write(" even more");
+
+        assertThat(buffer.build().toString(), is("hello world"));
+        assertThat(copy.build().toString(), is("hello world more"));
+        assertThat(copy2.build().toString(), is("hello world more even more"));
+    }
+
+    @Test
     public void testWriteIntAsString() {
         final WritableBuffer buffer = WritableBuffer.of(100);
         buffer.writeAsString(0);
