@@ -163,7 +163,7 @@ public interface ReadableBuffer extends Buffer {
      * Checks whether this buffer has any bytes available for reading without
      * blocking.
      *
-     * This is the same as <code>{@link #getReadableBytes()} > 0</code>
+     * This is the same as <code>{@link #getReadableBytes()} &gt; 0</code>
      *
      * @return
      */
@@ -201,7 +201,7 @@ public interface ReadableBuffer extends Buffer {
     Buffer readUntilWhiteSpace();
 
     /**
-     * Same as {@link #readUntil(4096, 'b')}
+     * Same as {@link #readUntil(int, byte...)} where the max bytes is set to 4096
      *
      * Read until the specified byte is encountered and return a buffer
      * representing that section of the buffer.

@@ -143,7 +143,7 @@ public interface WritableBuffer {
 
     /**
      * Checks whether this {@link WritableBuffer} has any space left for writing. Same
-     * as {@link #getWritableBytes()} > 0
+     * as {@link #getWritableBytes()} &gt; 0
      *
      * @return
      */
@@ -267,7 +267,7 @@ public interface WritableBuffer {
     /**
      * Depending on the use case, you may find yourself creating a {@link WritableBuffer}, write some stuff
      * and then "freeze" it in place so no other modifications can be made to it. One way to accomplish that is to
-     * use the method {@link #toBuffer()}, which in the context of the {@link WritableBuffer} will of
+     * use the method {@link Buffer#toBuffer()}, which in the context of the {@link WritableBuffer} will create
      * an immutable {@link Buffer} by copying the entire underlying byte-array (only the portion that has been
      * written to of course). This would achieve a thread safe 100% immutable buffer that you can safely pass around
      * and be certain no harm can come to it.
@@ -281,7 +281,7 @@ public interface WritableBuffer {
      * index of the {@link WritableBuffer} will be set to values indicating that there is no more room to write
      * and no more data available for reading.
      *
-     * Calls to {@link #setWriterIndex(int)} and {@link #setReaderIndex(int)} will be disallowed and an
+     * Calls to {@link #setWriterIndex(int)} and {@link ReadableBuffer#setReaderIndex(int)} will be disallowed and an
      * {@link IllegalStateException} will be thrown.
      *
      * Any method calls to modify the underlying data (so setXXX and write's) will "blow up"

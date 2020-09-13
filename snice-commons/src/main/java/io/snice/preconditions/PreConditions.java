@@ -36,7 +36,6 @@ public final class PreConditions {
     /**
      * Ensure that the reference is indeed null.
      *
-     * @return
      * @throws IllegalArgumentException in case the value isn't null
      */
     public static <T> void assertNull(final T reference, final String msg) throws IllegalArgumentException {

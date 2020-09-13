@@ -14,7 +14,7 @@ public class EitherTest {
         assertThat(right.isRight(), is(true));
         assertThat(right.isLeft(), is(false));
         assertThat(right.fold(l -> "hello", i -> i.toString()), is("123"));
-        assertThat(right.getRight(), is(123));
+        assertThat(right.get(), is(123));
     }
 
     @Test
@@ -26,14 +26,34 @@ public class EitherTest {
         assertThat(left.getLeft(), is("hello world"));
     }
 
+    /**
+     * Following the convention from vavr.io, a right is considered success and left an error
+     * condition so there may be cases where you either want the right only and if it is
+     * not there then throw an exception.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testNotSuccessful() {
+        Either.left("ooops, error").fold(e -> {
+            throw new IllegalArgumentException("unable to produce the result, Got error");},
+                r -> r);
+    }
+
+    @Test
+    public void testSuccessful() {
+        final Integer result = Either.right(12).fold(e -> {
+                    throw new IllegalArgumentException("unable to produce the result, Got error");},
+                r -> r * 2);
+        assertThat(result, is(24));
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testGetLeftOnRight() {
-        Either.right("hellow").getLeft();
+        Either.right("hello").getLeft();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testGetRightOnLeft() {
-        Either.left("hellow").getRight();
+        Either.left("hello").get();
     }
 
     @Test

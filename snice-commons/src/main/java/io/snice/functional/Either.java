@@ -5,7 +5,12 @@ import java.util.function.Function;
 import static io.snice.preconditions.PreConditions.assertNotNull;
 
 /**
- * This class is essentially a condensed version of the one find in vavr.io.
+ * Note:This class is essentially a condensed version of the one find in vavr.io.
+ *
+ * {@link Either} represents a value of two possible types, either it is a left or it is
+ * a right. By convention, the right value is considered the success branch, and the left
+ * an error. This {@link Either} is right-biased, meaning operations by default operate
+ * on the right value if present.
  *
  * Vavr.io is an excellent library and you should check it out. The reason for not
  * pulling in that library into the various snice.io projects is that, in general, the
@@ -36,12 +41,12 @@ public interface Either<L, R> {
         return false;
     }
 
-    default L getLeft() {
-        throw new IllegalArgumentException("Unable to get a Left on a Right");
+    default R get() {
+        throw new IllegalArgumentException("Unable to get a Right on a Left");
     }
 
-    default R getRight() {
-        throw new IllegalArgumentException("Unable to get a Right on a Left");
+    default L getLeft() {
+        throw new IllegalArgumentException("Unable to get a Left on a Right");
     }
 
     class Right<L, R> implements Either<L,R> {
@@ -65,7 +70,7 @@ public interface Either<L, R> {
         }
 
         @Override
-        public R getRight() {
+        public R get() {
             return value;
         }
 
