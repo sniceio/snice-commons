@@ -32,6 +32,19 @@ public class ValidationErrorTest {
     }
 
     @Test
+    public void testAppendErrorsSafe() {
+        final var v1 = ValidationError.append(null, "hello1");
+        final var v2 = ValidationError.append(v1, "hello2");
+
+        assertThat(v1.getErrors().size(), is(1));
+        assertThat(v1.getErrors().get(0), is("hello1"));
+
+        assertThat(v2.getErrors().size(), is(2));
+        assertThat(v2.getErrors().get(0), is("hello1"));
+        assertThat(v2.getErrors().get(1), is("hello2"));
+    }
+
+    @Test
     public void testAddErrors() {
         final var validation = ValidationError.of("error1", "error2");
         final var v2 = validation.append("error3");

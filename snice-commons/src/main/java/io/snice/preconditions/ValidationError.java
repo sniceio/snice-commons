@@ -29,6 +29,25 @@ public interface ValidationError<T> {
     }
 
     /**
+     * Convenience method for appending errors to a {@link ValidationError} that, if null, will
+     * first be created.
+     *
+     * @param v the {@link ValidationError} to append the given error to, or if it is null, a new
+     *          one will be created.
+     * @param error the error that will be appended to the given {@link ValidationError} or to a new
+     *              one if the given one is null.
+     * @return a new {@link ValidationError} object that contains the given error as well as any previous
+     * errors from the optional {@link ValidationError} passed in.
+     */
+    static <T> ValidationError<T> append(ValidationError<T> v, T error) {
+        if (v == null) {
+            return ValidationError.of(error);
+        }
+
+        return v.append(error);
+    }
+
+    /**
      * A list of T describing the issues found while validating.
      *
      * @return
