@@ -97,6 +97,35 @@ public final class Buffers {
         return DefaultImmutableBuffer.of(b);
     }
 
+    /**
+     * The default {@link #wrap(int)} will wrap the int as a String but if you want
+     * wrap the int as, well, integer, you have to call this method.
+     *
+     * @param value
+     * @return
+     */
+    public static Buffer wrapAsInt(final int value) {
+        final byte[] buffer = new byte[4];
+        buffer[0] = (byte) (value >>> 24);
+        buffer[1] = (byte) (value >>> 16);
+        buffer[2] = (byte) (value >>> 8);
+        buffer[3] = (byte) value;
+        return Buffers.wrap(buffer);
+    }
+
+    public static Buffer wrapAsLong(final long value) {
+        final byte[] buffer = new byte[8];
+        buffer[0] = (byte)(value >>> 56);
+        buffer[1] = (byte)(value >>> 48);
+        buffer[2] = (byte)(value >>> 40);
+        buffer[3] = (byte)(value >>> 32);
+        buffer[4] = (byte)(value >>> 24);
+        buffer[5] = (byte)(value >>> 16);
+        buffer[6] = (byte)(value >>>  8);
+        buffer[7] = (byte)(value >>>  0);
+        return Buffers.wrap(buffer);
+    }
+
     public static boolean isNullOrEmpty(final Buffer buffer) {
         return buffer == null || buffer.isEmpty();
     }
