@@ -114,8 +114,9 @@ public interface WritableBuffer {
      * in these cases, you want to fast-forward the writer index to the very last position. This method
      * does that.
      */
-    default void fastForwardWriterIndex() {
+    default WritableBuffer fastForwardWriterIndex() {
         setWriterIndex(capacity());
+        return this;
     }
 
     /**
@@ -123,8 +124,9 @@ public interface WritableBuffer {
      * the {@link #setWriterIndex(int)} to zero. The main reason for this method is just
      * to be consistent with the {@link #fastForwardWriterIndex()}.
      */
-    default void rewindWriterIndex() {
+    default WritableBuffer rewindWriterIndex() {
         setWriterIndex(0);
+        return this;
     }
 
     /**
