@@ -440,6 +440,7 @@ public interface Buffer {
     default int countOccurences(final int startIndex, final int maxBytes, final char b) throws IndexOutOfBoundsException {
         return countOccurences(startIndex, maxBytes, (byte)b);
     }
+    
 
     /**
      * Same as {@link #countOccurences(int, int, byte)} where the start index is zero and the maximum
@@ -842,7 +843,12 @@ public interface Buffer {
             final int i1 = (b & 0xF0) >> 4;
             final int i2 = b & 0x0F;
             sb.append(i2);
-            sb.append(i1);
+
+            // all 1111 indicates an un-even number of digits
+            // so we should skip this one
+            if (i1 != 15) {
+                sb.append(i1);
+            }
         }
         return sb.toString();
     }

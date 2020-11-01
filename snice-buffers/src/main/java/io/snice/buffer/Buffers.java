@@ -3,12 +3,13 @@ package io.snice.buffer;
 import io.snice.buffer.impl.DefaultImmutableBuffer;
 import io.snice.buffer.impl.EmptyBuffer;
 import io.snice.net.IPv4;
+import io.snice.preconditions.PreConditions;
 
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.snice.preconditions.PreConditions.assertNotNull;
+import static io.snice.preconditions.PreConditions.*;
 
 public final class Buffers {
 
@@ -61,10 +62,37 @@ public final class Buffers {
         return Buffer.of(buffer);
     }
 
+    public static Buffer wrap(final byte buffer) {
+        return Buffer.of(buffer);
+    }
+
     public static Buffer wrap(final Buffer... buffers) {
         assertNotNull(buffers == null || buffers.length == 0, "You must specify at least one buffer");
         return Buffers.wrap(Arrays.asList(buffers));
 
+    }
+
+    public static Buffer wrapAsTbcd(final String tbcd) {
+        assertNotEmpty(tbcd, "The TBCD string cannot be null or the empty string");
+        final var buffer = WritableBuffer.of(tbcd.length() / 2 + tbcd.length() % 2).fastForwardWriterIndex();
+        for (int i = 0; i < buffer.capacity(); ++i) {
+            final var digit1 = tbcd.charAt(i * 2);
+            assertArgument(Character.isDigit(digit1), "Expected all characters in string to be digits");
+            final var b0 = ((digit1 - '0') & 0x0F);
+
+            final int a0;
+            final int k = i * 2 + 1;
+            if (k < tbcd.length()) {
+                final var digit2 = tbcd.charAt(k);
+                assertArgument(Character.isDigit(digit2), "Expected all characters in string to be digits");
+                a0 = (digit2 - '0') << 4;
+            } else {
+                // un-even number of digits. Mark this fact by 1111
+                a0 = 0xF0;
+            }
+            buffer.setByte(i, (byte)(a0 + b0));
+        }
+        return buffer.build();
     }
 
     public static Buffer wrap(final List<Buffer> buffers) {
