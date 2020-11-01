@@ -5,7 +5,7 @@ import org.junit.Test;
 import java.util.function.Consumer;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 
 public class WritableBufferTest {
@@ -23,6 +23,16 @@ public class WritableBufferTest {
         assertThat(buffer.build().toString(), is("hello world"));
         assertThat(copy.build().toString(), is("hello world more"));
         assertThat(copy2.build().toString(), is("hello world more even more"));
+    }
+
+    @Test
+    public void testWriteFull() {
+        final WritableBuffer buffer = WritableBuffer.of(10);
+        final Buffer a = Buffers.wrap("0123456");
+        final Buffer b = Buffers.wrap("789");
+        buffer.write(a);
+        buffer.write(b);
+        assertThat(buffer.build().toString(), is("0123456789"));
     }
 
     @Test
