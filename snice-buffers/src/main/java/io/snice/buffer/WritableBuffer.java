@@ -186,6 +186,15 @@ public interface WritableBuffer {
     void write(long value) throws IndexOutOfBoundsException;
 
     /**
+     * Only write the five lowest octets of the given long.
+     *
+     * @param value
+     * @throws IndexOutOfBoundsException in case there are not enough bytes to write these five octets.
+     * @throws IllegalArgumentException in case you try to write a negative number.
+     */
+    void writeFiveOctets(long value) throws IndexOutOfBoundsException, IllegalArgumentException;
+
+    /**
      * Same as {@link WritableBuffer#write(String, String)} where the charset is set to
      * "UTF-8"
      *

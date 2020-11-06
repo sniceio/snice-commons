@@ -439,6 +439,11 @@ public class DefaultReadableBuffer implements ReadableBuffer  {
     }
 
     @Override
+    public long getLongFromFiveOctets(int index) throws IndexOutOfBoundsException {
+        return buffer.getLongFromFiveOctets(index);
+    }
+
+    @Override
     public long getUnsignedInt(final int index) throws IndexOutOfBoundsException {
         return buffer.getUnsignedInt(index);
     }

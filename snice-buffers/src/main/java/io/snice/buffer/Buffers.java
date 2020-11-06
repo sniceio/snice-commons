@@ -66,12 +66,6 @@ public final class Buffers {
         return Buffer.of(buffer);
     }
 
-    public static Buffer wrap(final Buffer... buffers) {
-        assertNotNull(buffers == null || buffers.length == 0, "You must specify at least one buffer");
-        return Buffers.wrap(Arrays.asList(buffers));
-
-    }
-
     public static Buffer wrapAsTbcd(final String tbcd) {
         assertNotEmpty(tbcd, "The TBCD string cannot be null or the empty string");
         final var buffer = WritableBuffer.of(tbcd.length() / 2 + tbcd.length() % 2).fastForwardWriterIndex();
@@ -102,16 +96,40 @@ public final class Buffers {
 
         // TODO: of a proper composite buffer
         final int size = (int)buffers.stream().mapToInt(Buffer::capacity).sum();
-        final byte[] buffer = new byte[size];
-        int index = 0;
-        for (final Buffer b : buffers) {
-            for (int i = 0; i < b.capacity(); ++i) {
-                buffer[index++] = b.getByte(i);
-            }
-        };
-
-        return Buffers.wrap(buffer);
+        final var writable = WritableBuffer.of(size);
+        for (int i = 0; i < buffers.size(); ++i) {
+            buffers.get(i).writeTo(writable);
+        }
+        return writable.build();
     }
+
+    /**
+     * Wrap the specified buffers in a single buffer.
+     *
+     * NOTE: currently, it will copy all bytes into a new byte-array. Will
+     * get to create a composite buffer.
+     *
+     * @param buffers
+     * @return the combined buffers or an empty buffer if you pass in null or zero length array of buffers
+     */
+    public static Buffer wrap(final Buffer... buffers) {
+        if (buffers == null || buffers.length == 0) {
+            return EmptyBuffer.EMPTY;
+        }
+
+        // TODO: really need that composite buffer!
+        int size = 0;
+        for (int i = 0; i < buffers.length; ++i) {
+            size += buffers[i].capacity();
+        }
+
+        final var writable = WritableBuffer.of(size);
+        for (int i = 0; i < buffers.length; ++i) {
+            buffers[i].writeTo(writable);
+        }
+        return writable.build();
+    }
+
 
     /**
      * Assume that the given string is an IPv4 address (i.e. a.b.c.d such as 10.36.10.10)
@@ -335,5 +353,21 @@ public final class Buffers {
             p = 10 * p;
         }
         return 19;
+    }
+
+    public static void assertBufferCapacityAtLeast(final Buffer buffer, final int capacity) {
+        assertArgument(buffer != null && buffer.capacity() >= capacity);
+    }
+
+    public static void assertBufferCapacityAtLeast(final Buffer buffer, final int capacity, final String message) {
+        assertArgument(buffer != null && buffer.capacity() >= capacity, message);
+    }
+
+    public static void assertBufferCapacity(final Buffer buffer, final int capacity) {
+        assertArgument(buffer != null && buffer.capacity() == capacity);
+    }
+
+    public static void assertBufferCapacity(final Buffer buffer, final int capacity, final String message) {
+        assertArgument(buffer != null && buffer.capacity() == capacity, message);
     }
 }

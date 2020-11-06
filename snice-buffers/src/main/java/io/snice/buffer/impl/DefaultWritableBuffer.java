@@ -303,6 +303,22 @@ public final class DefaultWritableBuffer implements WritableBuffer {
     }
 
     @Override
+    public void writeFiveOctets(final long value) throws IndexOutOfBoundsException {
+        assertNotDone();
+        if (!checkWritableBytesSafe(5)) {
+            throw new IndexOutOfBoundsException("Unable to write the entire five octet int to this buffer. Nothing was written");
+        }
+        assertArgument(value >= 0);
+        final int index = lowerBoundary + writerIndex;
+        buffer[index + 0] = (byte)(value >>> 32);
+        buffer[index + 1] = (byte)(value >>> 24);
+        buffer[index + 2] = (byte)(value >>> 16);
+        buffer[index + 3] = (byte)(value >>>  8);
+        buffer[index + 4] = (byte)(value >>>  0);
+        writerIndex += 5;
+    }
+
+    @Override
     public void write(final String s) throws IndexOutOfBoundsException{
         assertNotDone();
         write(s, "UTF-8");

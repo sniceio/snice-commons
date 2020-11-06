@@ -254,6 +254,13 @@ public class DefaultImmutableBuffer implements Buffer {
         return Buffer.signedLong(buffer[i], buffer[i + 1], buffer[i + 2], buffer[i + 3], buffer[i + 4], buffer[i + 5], buffer[i + 6], buffer[i + 7]);
     }
 
+    public long getLongFromFiveOctets(int index) throws IndexOutOfBoundsException {
+        final int i = lowerBoundary + index;
+        checkIndex(i);
+        checkIndex(i + 4);
+        return Buffer.signedLong(buffer[i], buffer[i + 1], buffer[i + 2], buffer[i + 3], buffer[i + 4]);
+    }
+
     @Override
     public int getIntFromThreeOctets(final int index) throws IndexOutOfBoundsException {
         final int i = lowerBoundary + index;

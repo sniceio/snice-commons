@@ -128,6 +128,18 @@ public interface Buffer {
     }
 
     /**
+     * Somewhat of an odd method perhaps but there are times (e.g. for protocol GTP) where we
+     * need to work with 5 octet numbers.
+     */
+    static long signedLong(final byte a, final byte b, final byte c, final byte d, final byte e) {
+        return (((long)(a & 255) << 32) +
+                ((long)(b & 255) << 24) +
+                ((c & 255) << 16) +
+                ((d & 255) <<  8) +
+                (e & 255));
+    }
+
+    /**
      * Helper method to "parse" out a signed int from the given 3 bytes.
      *
      * @param a
@@ -627,6 +639,16 @@ public interface Buffer {
      * @throws IndexOutOfBoundsException
      */
     int getIntFromThreeOctets(int index) throws IndexOutOfBoundsException;
+
+    /**
+     * Somewhat of an odd method but there are times when you need to parse out
+     * 5 octets as a long, as opposed to the normal 8.
+     *
+     * @param index
+     * @return
+     * @throws IndexOutOfBoundsException
+     */
+    long getLongFromFiveOctets(int index) throws IndexOutOfBoundsException;
 
     long getUnsignedInt(int index) throws IndexOutOfBoundsException;
 

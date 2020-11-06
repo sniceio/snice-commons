@@ -1,11 +1,12 @@
 package io.snice.buffer;
 
+import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 
 import java.util.function.Consumer;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 
 public abstract class AbstractReadWritableBufferTest extends AbstractReadableBufferTest {
@@ -14,6 +15,18 @@ public abstract class AbstractReadWritableBufferTest extends AbstractReadableBuf
 
     protected ReadWriteBuffer createWritableBuffer(final int capacity, final int offset, final int length) {
         return (ReadWriteBuffer)createBuffer(new byte[capacity], offset, length);
+    }
+
+    @Test
+    public void testWriteFiveOctetLong() throws Exception {
+        final WritableBuffer buffer = createWritableBuffer(100);
+        buffer.writeFiveOctets(123);
+        buffer.write(777);
+        buffer.write("hello");
+        final var b = buffer.build();
+        assertThat(b.capacity(), is(5 + 4 + "hello".getBytes("UTF-8").length));
+        assertThat(b.getLongFromFiveOctets(0), is(123L));
+        assertThat(b.getInt(0 + 5), is(777));
     }
 
     @Test

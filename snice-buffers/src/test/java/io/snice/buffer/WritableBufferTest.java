@@ -11,6 +11,18 @@ import static org.junit.Assert.fail;
 public class WritableBufferTest {
 
     @Test
+    public void testWriteFiveOctetLong() throws Exception {
+        final WritableBuffer buffer = WritableBuffer.of(100);
+        buffer.writeFiveOctets(123);
+        buffer.write(777);
+        buffer.write("hello");
+        final var b = buffer.build();
+        assertThat(b.capacity(), is(5 + 4 + "hello".getBytes("UTF-8").length));
+        assertThat(b.getLongFromFiveOctets(0), is(123L));
+        assertThat(b.getInt(0 + 5), is(777));
+    }
+
+    @Test
     public void testCopyBuffer() {
         final WritableBuffer buffer = WritableBuffer.of(100);
         buffer.write("hello world");
