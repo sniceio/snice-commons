@@ -8,6 +8,8 @@ import io.snice.preconditions.PreConditions;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static io.snice.preconditions.PreConditions.*;
 
@@ -51,7 +53,7 @@ public final class Buffers {
      *            the index of the lowest byte that is accessible to this OldBuffer
      *            (zero based index)
      * @param upperBoundary
-     *            the upper boundary (exclusive) of the range of visible bytes.
+     *            the upper oundary (exclusive) of the range of visible bytes.
      * @return
      */
     public static Buffer wrap(final byte[] buffer, final int lowerBoundary, final int upperBoundary) {
@@ -62,12 +64,25 @@ public final class Buffers {
         return Buffer.of(buffer);
     }
 
+    /**
+     * Create a new {@link Buffer} of the given size and fill it with
+     * a random set of bytes.
+     *
+     * @param size the size of the buffer, must be greater than zero.
+     */
+    public static Buffer random(final int size) {
+        assertArgument(size > 0, "The size of the randomized buffer must be greater than zero");
+        final byte[] bytes = new byte[size];
+        ThreadLocalRandom.current().nextBytes(bytes);
+        return Buffers.wrap(bytes);
+    }
+
     public static Buffer wrap(final byte buffer) {
         return Buffer.of(buffer);
     }
 
     public static Buffer wrapAsTbcd(final String tbcd) {
-        assertNotEmpty(tbcd, "The TBCD string cannot be null or the empty string");
+        PreConditions.assertNotEmpty(tbcd, "The TBCD string cannot be null or the empty string");
         final var buffer = WritableBuffer.of(tbcd.length() / 2 + tbcd.length() % 2).fastForwardWriterIndex();
         for (int i = 0; i < buffer.capacity(); ++i) {
             final var digit1 = tbcd.charAt(i * 2);
@@ -361,6 +376,14 @@ public final class Buffers {
 
     public static void assertBufferCapacityAtLeast(final Buffer buffer, final int capacity, final String message) {
         assertArgument(buffer != null && buffer.capacity() >= capacity, message);
+    }
+
+    public static void assertNotEmpty(final Buffer buffer) {
+        assertArgument(buffer != null && !buffer.isEmpty());
+    }
+
+    public static void assertNotEmpty(final Buffer buffer, final String msg) {
+        assertArgument(buffer != null && !buffer.isEmpty(), msg);
     }
 
     public static void assertBufferCapacity(final Buffer buffer, final int capacity) {
