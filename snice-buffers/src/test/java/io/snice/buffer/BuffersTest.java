@@ -35,7 +35,6 @@ public class BuffersTest {
         assertThat(tbcd04, is(Buffers.wrap((byte)0x87)));
     }
 
-
     @Test
     public void testWrapAsInt() {
         assertThat(Buffers.wrapAsInt(123).getInt(0), is(123));

@@ -81,6 +81,14 @@ public class DefaultImmutableBuffer implements Buffer {
     }
 
     @Override
+    public byte[] getContent() {
+        final int capacity = capacity();
+        final var content = new byte[capacity];
+        System.arraycopy(buffer, lowerBoundary, content, 0, capacity);
+        return content;
+    }
+
+    @Override
     public ReadableBuffer toReadableBuffer() {
         return DefaultReadableBuffer.of(this);
     }

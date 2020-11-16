@@ -313,6 +313,11 @@ public class DefaultReadableBuffer implements ReadableBuffer  {
     }
 
     @Override
+    public byte[] getContent() {
+        return buffer.slice(readerIndex, buffer.capacity()).getContent();
+    }
+
+    @Override
     public String toString() {
         return buffer.slice(readerIndex, buffer.capacity()).toString();
     }

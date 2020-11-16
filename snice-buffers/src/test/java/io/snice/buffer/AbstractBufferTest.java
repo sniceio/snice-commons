@@ -39,6 +39,57 @@ public abstract class AbstractBufferTest {
     }
 
     @Test
+    public void testGetContent() throws Exception {
+        final var buffer = createBuffer(generateContent(100));
+        final var content = buffer.getContent();
+        ensureContent(content, 0);
+
+        // slice it out...
+        ensureContent(buffer.slice(10, 100).getContent(), 10);
+        ensureContent(buffer.slice(10, 20).getContent(), 10);
+
+        // boundary testing...
+        ensureContent(buffer.slice(10, 10).getContent(), 10);
+        ensureContent(buffer.slice(99, 100).getContent(), 99);
+        ensureContent(buffer.slice(100, 100).getContent(), 100);
+
+        // slice of slice...
+        final var slice = buffer.slice(10, 50);
+
+        // remember we already sliced 10 out so the slice of 10 of 10 means we should be
+        // at 20...
+        ensureContent(slice.slice(10, 30).getContent(), 20);
+
+        // again, the slice started at 10 so... and we sliced out
+        // 10 to 50 which means that there are only 40 bytes in the slice so
+        // ask for 40...
+        ensureContent(slice.slice(0, 40).getContent(), 10);
+
+        ensureContent(slice.slice(1, 40).getContent(), 11);
+        ensureContent(slice.slice(1, 30).getContent(), 11);
+    }
+
+    /**
+     * Ensure that the given byte-array contains the bytes from (inclusive) start
+     * to the end and it is assumed that the content is +1 as far as values
+     * goes for every new byte up the index.
+     */
+    private void ensureContent(final byte[] content, int start) {
+        for (int i = 0; i < content.length; ++i) {
+            assertThat(content[i], is((byte)(start + i)));
+        }
+    }
+
+
+    private final byte[] generateContent(int length) {
+        final byte[] content = new byte[length];
+        for (int i = 0; i < length; ++i) {
+            content[i] = (byte)i;
+        }
+        return content;
+    }
+
+    @Test
     public void testWrapLong() throws Exception {
         assertThat(Buffers.wrap(123L).toString(), is("123"));
         assertThat(Buffers.wrap(-123L).toString(), is("-123"));

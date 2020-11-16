@@ -379,6 +379,11 @@ public final class DefaultReadWriteBuffer implements ReadWriteBuffer {
     }
 
     @Override
+    public byte[] getContent() {
+        return copyArray();
+    }
+
+    @Override
     public ReadableBuffer toReadableBuffer() {
         return Buffers.wrap(copyArray()).toReadableBuffer();
     }

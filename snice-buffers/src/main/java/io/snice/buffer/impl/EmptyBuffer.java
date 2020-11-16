@@ -18,6 +18,8 @@ public class EmptyBuffer implements ReadableBuffer {
 
     public static final Buffer EMPTY = new EmptyBuffer();
 
+    private static final byte[] EMPTY_CONTENT = new byte[0];
+
     private EmptyBuffer() {
         // only one is really needed to of (well, one per class loader I guess
         // will be the actual end result)
@@ -41,6 +43,11 @@ public class EmptyBuffer implements ReadableBuffer {
     @Override
     public Buffer toBuffer() {
         return this;
+    }
+
+    @Override
+    public byte[] getContent() {
+        return EMPTY_CONTENT;
     }
 
     @Override

@@ -239,6 +239,17 @@ public interface Buffer {
     Buffer toBuffer();
 
     /**
+     * Get the raw underlying byte-buffer of this {@link Buffer}.
+     *
+     * NOTE: this will create a copy of underlying byte-array since the {@link Buffer} is
+     * immutable and as such, it would break that encapsulation if the byte-array was
+     * given out as is. Hence, this operation is "expensive".
+     *
+     * @return a copy of the underlying byte-array that is backing this {@link Buffer}.
+     */
+    byte[] getContent();
+
+    /**
      * <p>
      * Convert this immutable buffer into a {@link ReadableBuffer}.
      * </p>

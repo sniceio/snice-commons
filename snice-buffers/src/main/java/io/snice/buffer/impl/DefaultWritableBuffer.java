@@ -372,6 +372,9 @@ public final class DefaultWritableBuffer implements WritableBuffer {
         return copy;
     }
 
+    public byte[] getContent() {
+        throw new RuntimeException("Not implemented yet");
+    }
 
     @Override
     public String toString() {
