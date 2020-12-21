@@ -234,6 +234,11 @@ public class EmptyBuffer implements ReadableBuffer {
     }
 
     @Override
+    public String toHexString() {
+        return "";
+    }
+
+    @Override
     public int getReaderIndex() {
         return 0;
     }

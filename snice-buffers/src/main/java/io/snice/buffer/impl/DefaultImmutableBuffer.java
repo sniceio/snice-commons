@@ -375,6 +375,11 @@ public class DefaultImmutableBuffer implements Buffer {
     }
 
     @Override
+    public String toHexString() {
+        return HexDump.toHexString(buffer, lowerBoundary, upperBoundary - lowerBoundary);
+    }
+
+    @Override
     public Buffer clone() {
         return this;
     }

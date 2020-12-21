@@ -88,9 +88,12 @@ public class HexDump {
     }
 
     public static String toHexString(final byte[] array, final int offset, final int length) {
-        final char[] buf = new char[length * 2];
+        final char[] buf = new char[2 + length * 2];
 
-        int bufIndex = 0;
+        buf[0] = '0';
+        buf[1] = 'x';
+
+        int bufIndex = 2;
         for (int i = offset; i < (offset + length); i++) {
             final byte b = array[i];
             buf[bufIndex++] = HEX_DIGITS[(b >>> 4) & 0x0F];

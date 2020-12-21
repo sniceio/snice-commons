@@ -549,6 +549,11 @@ public final class DefaultReadWriteBuffer implements ReadWriteBuffer {
     }
 
     @Override
+    public String toHexString() {
+        return wrap.toHexString();
+    }
+
+    @Override
     public ReadWriteBuffer clone() {
         throw new RuntimeException("Haven't implemented this just yet");
     }

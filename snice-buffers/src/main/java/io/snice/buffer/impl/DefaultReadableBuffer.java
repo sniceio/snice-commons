@@ -1,5 +1,6 @@
 package io.snice.buffer.impl;
 
+import com.google.polo.pairing.HexDump;
 import io.snice.buffer.Buffer;
 import io.snice.buffer.ByteNotFoundException;
 import io.snice.buffer.ReadableBuffer;
@@ -506,6 +507,11 @@ public class DefaultReadableBuffer implements ReadableBuffer  {
     @Override
     public String dumpAsHex() {
         return buffer.dumpAsHex();
+    }
+
+    @Override
+    public String toHexString() {
+        return buffer.toHexString();
     }
 
     @Override

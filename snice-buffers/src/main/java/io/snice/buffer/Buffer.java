@@ -816,6 +816,16 @@ public interface Buffer {
     String dumpAsHex();
 
     /**
+     * The difference between {@link #dumpAsHex()} and this one is that dump will
+     * do the nice wireshark looking dump with interpretation of the actual values in UTF-8
+     * as well as having an address in the beginning. The {@link #toHexString()} will just
+     * convert everything to a hex stream and that's it.
+     *
+     * @return
+     */
+    String toHexString();
+
+    /**
      * If necessary, this will perform a deep clone of this object. However, for the
      * default immutable buffer, it will just return this since everything is immutable.
      * For the {@link ReadableBuffer} only the reader index is actually mutable and as such,
