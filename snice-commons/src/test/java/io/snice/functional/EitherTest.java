@@ -1,10 +1,14 @@
 package io.snice.functional;
 
+import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.fail;
 
 public class EitherTest {
 
@@ -15,6 +19,10 @@ public class EitherTest {
         assertThat(right.isLeft(), is(false));
         assertThat(right.fold(l -> "hello", i -> i.toString()), is("123"));
         assertThat(right.get(), is(123));
+
+        final AtomicReference<Integer> value = new AtomicReference<>();
+        right.accept(l -> {}, value::set);
+        assertThat(value.get(), is(123));
     }
 
     @Test
@@ -24,6 +32,10 @@ public class EitherTest {
         assertThat(left.isLeft(), is(true));
         assertThat(left.fold(l -> l.length(), i -> -1), is(11));
         assertThat(left.getLeft(), is("hello world"));
+
+        final AtomicReference<String> value = new AtomicReference<>();
+        left.accept(value::set, r -> {});
+        assertThat(value.get(), is("hello world"));
     }
 
     /**

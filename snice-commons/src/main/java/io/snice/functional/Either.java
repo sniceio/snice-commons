@@ -1,5 +1,6 @@
 package io.snice.functional;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static io.snice.preconditions.PreConditions.assertNotNull;
@@ -24,6 +25,8 @@ public interface Either<L, R> {
 
 
     <U> U fold(Function<? super L, ? extends U> leftMapper, Function<? super R, ? extends U> rightMapper);
+
+    void accept(Consumer<? super L> leftConsumer, Consumer<? super R> rightConsumer);
 
     static <L, R> Either<L, R> right(final R value) {
         return new Right<>(value);
@@ -65,6 +68,12 @@ public interface Either<L, R> {
         }
 
         @Override
+        public void accept(Consumer<? super L> leftConsumer, Consumer<? super R> rightConsumer) {
+            assertNotNull(rightConsumer, "The right consumer cannot be null");
+            rightConsumer.accept(value);
+        }
+
+        @Override
         public boolean isRight() {
             return true;
         }
@@ -102,6 +111,12 @@ public interface Either<L, R> {
         public <U> U fold(final Function<? super L, ? extends U> leftMapper, final Function<? super R, ? extends U> rightMapper) {
             assertNotNull(leftMapper, "The left mapper cannot be null");
             return leftMapper.apply(value);
+        }
+
+        @Override
+        public void accept(Consumer<? super L> leftConsumer, Consumer<? super R> rightConsumer) {
+            assertNotNull(leftConsumer, "The left consumer cannot be null");
+            leftConsumer.accept(value);
         }
 
         @Override
