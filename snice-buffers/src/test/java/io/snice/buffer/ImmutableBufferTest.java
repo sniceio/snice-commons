@@ -5,7 +5,7 @@ import io.snice.buffer.impl.EmptyBuffer;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 
 public class ImmutableBufferTest extends AbstractBufferTest {
@@ -19,6 +19,18 @@ public class ImmutableBufferTest extends AbstractBufferTest {
     public Buffer createBuffer(final byte[] array, int offset, int length) {
         return DefaultImmutableBuffer.of(array, offset, length);
     }
+
+    @Test
+    public void testToHexDump() {
+        final var b = Buffers.wrapAsTbcd("26053179311383");
+        final var hex = b.toHexString();
+        assertThat(hex, is("0x62501397133138"));
+
+        // slice and then dump
+        assertThat(b.slice(4).toHexString(), is("0x62501397"));
+    }
+
+
 
     /**
      * The internal implementation of the {@link DefaultImmutableBuffer} relies on the fact that
