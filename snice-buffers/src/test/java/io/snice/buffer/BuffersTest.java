@@ -35,6 +35,10 @@ public class BuffersTest {
 
         assertThat(extended1.slice(extended1.capacity() - 1).toString(), is("hello"));
         assertThat(extended2.slice(extended2.capacity() - 2).toString(), is("hello"));
+
+        // test with "bad" values
+        final var extended3 = Buffers.wrap(original, null);
+        assertThat(extended3, is(original));
     }
 
     @Test

@@ -127,6 +127,10 @@ public final class Buffers {
             return Buffers.wrap(bytes);
         }
 
+        if (bytes == null || bytes.length == 0) {
+            return buffer;
+        }
+
         final int totalSize = buffer.capacity() + bytes.length;
         final var writable = WritableBuffer.of(totalSize);
         writable.write(buffer);
@@ -147,6 +151,10 @@ public final class Buffers {
             buffers.get(i).writeTo(writable);
         }
         return writable.build();
+    }
+
+    public static Buffer wrap(final Buffer buffer) {
+        return buffer;
     }
 
     /**

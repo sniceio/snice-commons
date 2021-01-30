@@ -236,6 +236,10 @@ public final class DefaultWritableBuffer implements WritableBuffer {
 
     @Override
     public void write(final byte[] bytes) throws IndexOutOfBoundsException{
+        if (bytes == null || bytes.length == 0) {
+            return;
+        }
+
         write(bytes, 0, bytes.length);
     }
 
