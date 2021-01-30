@@ -104,6 +104,37 @@ public final class Buffers {
         return buffer.build();
     }
 
+    /**
+     * This is essentially extending the given buffer with the one extra byte.
+     *
+     * @param buffer
+     * @param b
+     * @return
+     */
+    public static Buffer wrap(final Buffer buffer, byte b) {
+        if (buffer == null || buffer.isEmpty()) {
+            return Buffers.wrap(b);
+        }
+
+        final var writable = WritableBuffer.of(buffer.capacity() + 1);
+        writable.write(buffer);
+        writable.write(b);
+        return writable.build();
+    }
+
+    public static Buffer wrap(final Buffer buffer, byte... bytes) {
+        if (buffer == null || buffer.isEmpty()) {
+            return Buffers.wrap(bytes);
+        }
+
+        final int totalSize = buffer.capacity() + bytes.length;
+        final var writable = WritableBuffer.of(totalSize);
+        writable.write(buffer);
+        writable.write(bytes);
+        return writable.build();
+
+    }
+
     public static Buffer wrap(final List<Buffer> buffers) {
         if (buffers == null || buffers.isEmpty()) {
             return EmptyBuffer.EMPTY;

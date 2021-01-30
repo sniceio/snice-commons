@@ -16,6 +16,27 @@ public class BuffersTest {
         assertThat(a, is(b));
     }
 
+    /**
+     * Test so that we can "extend/concatenate" a given buffer.
+     */
+    @Test
+    public void testConcatenate() {
+        final var original = Buffers.wrap("hello");
+        final var extended1 = Buffers.wrap(original, (byte)0xFF);
+        final var extended2 = Buffers.wrap(original, (byte)0xFF, (byte)0xAA);
+
+        assertThat(extended1.capacity(), is(original.capacity() + 1));
+        assertThat(extended2.capacity(), is(original.capacity() + 2));
+
+        assertThat(extended1.getByte(extended1.capacity() - 1), is((byte)0xFF));
+
+        assertThat(extended2.getByte(extended2.capacity() - 2), is((byte)0xFF));
+        assertThat(extended2.getByte(extended2.capacity() - 1), is((byte)0xAA));
+
+        assertThat(extended1.slice(extended1.capacity() - 1).toString(), is("hello"));
+        assertThat(extended2.slice(extended2.capacity() - 2).toString(), is("hello"));
+    }
+
     @Test
     public void testTBCD() {
         final var tbcd01 = Buffers.wrapAsTbcd("1234");
