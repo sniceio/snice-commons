@@ -98,7 +98,7 @@ public interface Buffer {
      * @return
      */
     static long unsignedInt(final byte a, final byte b, final byte c, final byte d) {
-        return (a & 0xff) << 24 | (b & 0xff) << 16 | (c & 0xff) << 8 | d & 0xff;
+        return ((long) (a & 0xff)) << 24 | (b & 0xff) << 16 | (c & 0xff) << 8 | d & 0xff;
     }
 
     /**

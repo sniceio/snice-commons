@@ -123,6 +123,17 @@ public final class PreConditions {
         assertArrayBoundaries(array.length, offset, length, msg);
     }
 
+    public static void assertArrayNotEmpty(final Object[] array) throws IllegalArgumentException {
+        assertArrayNotEmpty(array, "The given array cannot be null or the empty array");
+    }
+
+    public static void assertArrayNotEmpty(final Object[] array, final String msg) throws IllegalArgumentException {
+        if (array == null || array.length == 0) {
+            throw new IllegalArgumentException(msg);
+        }
+
+    }
+
     public static void assertArray(final byte[] array) throws IllegalArgumentException {
         if (array == null) {
             throw new IllegalArgumentException("The byte array cannot be null");
