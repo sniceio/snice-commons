@@ -510,8 +510,8 @@ public class DefaultReadableBuffer implements ReadableBuffer  {
     }
 
     @Override
-    public String toHexString() {
-        return buffer.toHexString();
+    public String toHexString(final boolean prefix) {
+        return buffer.toHexString(prefix);
     }
 
     @Override

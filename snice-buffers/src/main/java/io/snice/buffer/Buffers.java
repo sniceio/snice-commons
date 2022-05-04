@@ -1,14 +1,17 @@
 package io.snice.buffer;
 
+import com.google.polo.pairing.HexDump;
 import io.snice.buffer.impl.DefaultImmutableBuffer;
 import io.snice.buffer.impl.EmptyBuffer;
 import io.snice.net.IPv4;
 import io.snice.preconditions.PreConditions;
 
 import java.nio.charset.Charset;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static io.snice.preconditions.PreConditions.*;
@@ -77,8 +80,81 @@ public final class Buffers {
         return Buffers.wrap(bytes);
     }
 
+    /**
+     * Same as {@link #random(int)} but is using {@link SecureRandom} instead of {@link ThreadLocalRandom}.
+     *
+     * @param size
+     * @return
+     */
+    public static Buffer secureRandom(final int size) {
+        assertArgument(size > 0, "The size of the randomized buffer must be greater than zero");
+        final SecureRandom ng = Holder.numberGenerator;
+        final byte[] bytes = new byte[size];
+        ng.nextBytes(bytes);
+        return Buffers.wrap(bytes);
+    }
+
+    /*
+     * Copied from java.lang.UUID.
+     *
+     *
+     * The random number generator used by this class to create random
+     * based UUIDs. In a holder class to defer initialization until needed.
+     */
+    private static class Holder {
+        static final SecureRandom numberGenerator = new SecureRandom();
+    }
+
+    /**
+     * Creates a new UUID.
+     *
+     * This is simply a convenience method for {@link #random(int)} with a size of 16.
+     *
+     * @return
+     */
+    public static Buffer uuid() {
+        return random(16);
+    }
+
+    /**
+     * Creates a new secure UUID.
+     *
+     * This is simply a convenience method for {@link #secureRandom(int)} with a size of 16.
+     *
+     * @return
+     */
+    public static Buffer secureUuid() {
+        return secureRandom(16);
+    }
+
+    public static void write(final byte[] buffer, final int index, final long value) throws IndexOutOfBoundsException{
+        if (buffer.length + index + 8 < buffer.length) {
+            throw new IndexOutOfBoundsException("Unable to write the entire long to this buffer. Nothing was written");
+        }
+
+        buffer[index + 0] = (byte)(value >>> 56);
+        buffer[index + 1] = (byte)(value >>> 48);
+        buffer[index + 2] = (byte)(value >>> 40);
+        buffer[index + 3] = (byte)(value >>> 32);
+        buffer[index + 4] = (byte)(value >>> 24);
+        buffer[index + 5] = (byte)(value >>> 16);
+        buffer[index + 6] = (byte)(value >>>  8);
+        buffer[index + 7] = (byte)(value >>>  0);
+    }
+
     public static Buffer wrap(final byte buffer) {
         return Buffer.of(buffer);
+    }
+
+    /**
+     * Assume the given string is a hex string and encode it accordingly.
+     *
+     * @param hexString
+     * @return
+     * @throws IllegalArgumentException in case any of the characters in the given string aren't a hex value.
+     */
+    public static Buffer wrapAsHex(final String hexString) throws IllegalArgumentException {
+        return Buffers.wrap(HexDump.hexStringToByteArray(hexString));
     }
 
     public static Buffer wrapAsTbcd(final String tbcd) {
@@ -215,14 +291,7 @@ public final class Buffers {
 
     public static Buffer wrapAsLong(final long value) {
         final byte[] buffer = new byte[8];
-        buffer[0] = (byte)(value >>> 56);
-        buffer[1] = (byte)(value >>> 48);
-        buffer[2] = (byte)(value >>> 40);
-        buffer[3] = (byte)(value >>> 32);
-        buffer[4] = (byte)(value >>> 24);
-        buffer[5] = (byte)(value >>> 16);
-        buffer[6] = (byte)(value >>>  8);
-        buffer[7] = (byte)(value >>>  0);
+        write(buffer, 0, value);
         return Buffers.wrap(buffer);
     }
 
@@ -246,6 +315,14 @@ public final class Buffers {
         final byte[] bytes = new byte[size];
         getBytes(value, size, bytes);
         return DefaultImmutableBuffer.of(bytes);
+    }
+
+    public static Buffer wrap(final UUID uuid) {
+        assertNotNull(uuid);
+        final byte[] b = new byte[128];
+        write(b, 0, uuid.getMostSignificantBits());
+        write(b, 64, uuid.getLeastSignificantBits());
+        return Buffer.of(b);
     }
 
     public static Buffer wrap(final long value) {

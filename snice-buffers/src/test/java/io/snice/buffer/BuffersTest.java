@@ -4,6 +4,8 @@ import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 
+import java.util.UUID;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -76,6 +78,20 @@ public class BuffersTest {
         assertThat(Buffers.wrapAsLong(0L).getLong(0), is(0L));
         assertThat(Buffers.wrapAsLong(Long.MAX_VALUE).getLong(0), is(Long.MAX_VALUE));
         assertThat(Buffers.wrapAsLong(Long.MIN_VALUE).getLong(0), is(Long.MIN_VALUE));
+    }
+
+    @Test
+    public void testCreateUiid() {
+        final var uuid = Buffers.uuid();
+        System.out.println(uuid.toHexString());
+    }
+
+    @Test
+    public void testWrapUiid() {
+        final var uuid = UUID.randomUUID();
+        final var b = Buffers.wrap(uuid);
+        assertThat(b.getLong(0), is(uuid.getMostSignificantBits()));
+        assertThat(b.getLong(64), is(uuid.getLeastSignificantBits()));
     }
 
 }

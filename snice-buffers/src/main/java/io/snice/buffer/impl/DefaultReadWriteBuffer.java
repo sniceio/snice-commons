@@ -549,8 +549,8 @@ public final class DefaultReadWriteBuffer implements ReadWriteBuffer {
     }
 
     @Override
-    public String toHexString() {
-        return wrap.toHexString();
+    public String toHexString(final boolean prefix) {
+        return wrap.toHexString(prefix);
     }
 
     @Override

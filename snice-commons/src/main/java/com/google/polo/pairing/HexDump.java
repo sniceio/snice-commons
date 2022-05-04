@@ -83,17 +83,33 @@ public class HexDump {
         return toHexString(toByteArray(b));
     }
 
+    public static String toHexString(final boolean prefix, final byte[] array) {
+        return toHexString(prefix, array, 0, array.length);
+    }
+
     public static String toHexString(final byte[] array) {
-        return toHexString(array, 0, array.length);
+        return toHexString(true, array, 0, array.length);
     }
 
     public static String toHexString(final byte[] array, final int offset, final int length) {
-        final char[] buf = new char[2 + length * 2];
+        return toHexString(true, array, offset, length);
+    }
 
-        buf[0] = '0';
-        buf[1] = 'x';
+    public static String toHexString(final boolean prefix, final byte[] array, final int offset, final int length) {
+        final char[] buf;
+        int bufIndex = 0;
 
-        int bufIndex = 2;
+        if (prefix) {
+            buf = new char[2 + length * 2];
+
+            buf[0] = '0';
+            buf[1] = 'x';
+
+            bufIndex = 2;
+        } else {
+            buf = new char[length * 2];
+        }
+
         for (int i = offset; i < (offset + length); i++) {
             final byte b = array[i];
             buf[bufIndex++] = HEX_DIGITS[(b >>> 4) & 0x0F];
@@ -135,7 +151,7 @@ public class HexDump {
             return (c - 'a') + 10;
         }
 
-        throw new RuntimeException("Invalid hex char '" + c + "'");
+        throw new IllegalArgumentException("Invalid hex char '" + c + "'");
     }
 
     public static byte[] hexStringToByteArray(final String hexString) {

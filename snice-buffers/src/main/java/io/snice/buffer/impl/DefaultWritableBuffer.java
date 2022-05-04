@@ -295,14 +295,7 @@ public final class DefaultWritableBuffer implements WritableBuffer {
             throw new IndexOutOfBoundsException("Unable to write the entire long to this buffer. Nothing was written");
         }
         final int index = lowerBoundary + writerIndex;
-        buffer[index + 0] = (byte)(value >>> 56);
-        buffer[index + 1] = (byte)(value >>> 48);
-        buffer[index + 2] = (byte)(value >>> 40);
-        buffer[index + 3] = (byte)(value >>> 32);
-        buffer[index + 4] = (byte)(value >>> 24);
-        buffer[index + 5] = (byte)(value >>> 16);
-        buffer[index + 6] = (byte)(value >>>  8);
-        buffer[index + 7] = (byte)(value >>>  0);
+        Buffers.write(buffer, index, value);
         writerIndex += 8;
     }
 

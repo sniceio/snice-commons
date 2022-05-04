@@ -30,6 +30,16 @@ public class ImmutableBufferTest extends AbstractBufferTest {
         assertThat(b.slice(4).toHexString(), is("0x62501397"));
     }
 
+    @Test
+    public void testToHexDumpNoPrefix() {
+        final var b = Buffers.wrapAsTbcd("26053179311383");
+        final var hex = b.toHexString(false);
+        assertThat(hex, is("62501397133138"));
+
+        // slice and then dump
+        assertThat(b.slice(4).toHexString(false), is("62501397"));
+    }
+
 
 
     /**

@@ -234,7 +234,7 @@ public class EmptyBuffer implements ReadableBuffer {
     }
 
     @Override
-    public String toHexString() {
+    public String toHexString(final boolean prefix) {
         return "";
     }
 

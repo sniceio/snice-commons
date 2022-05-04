@@ -823,7 +823,17 @@ public interface Buffer {
      *
      * @return
      */
-    String toHexString();
+    default String toHexString() {
+        return toHexString(true);
+    }
+
+    /**
+     * By default, the {@link #toHexString()} will add the prefix "0x" in front of the hex-string.
+     * If you do not want that, call this method and pass in <code>false</code>
+     *
+     * @param prefix flag indicating whether the hex prefix of "0x" should be included in the resulting string.
+     */
+    String toHexString(boolean prefix);
 
     /**
      * If necessary, this will perform a deep clone of this object. However, for the
