@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.function.BiConsumer;
 
-public class LoggingSupportTest {
+public class LoggingTest {
 
     private AppenderTestSupport capturingAppender;
 
@@ -120,7 +120,7 @@ public class LoggingSupportTest {
         }
     }
 
-    private static class MyClass implements LoggingSupport {
+    private static class MyClass implements Logging {
 
         private static final Logger logger = LoggerFactory.getLogger(MyClass.class);
 

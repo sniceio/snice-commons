@@ -3,7 +3,7 @@ package io.snice.logging;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
 
-public interface LoggingSupport {
+public interface Logging {
 
     Logger getLogger();
 
