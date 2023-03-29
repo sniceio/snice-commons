@@ -1,4 +1,7 @@
+[![Build](https://github.com/sniceio/snice-commons/actions/workflows/build.yml/badge.svg)](https://github.com/sniceio/snice-commons/actions/workflows/build.yml)
+
 # Snice Commons
+
 
 Even Super Nice things have things in Common.
 
