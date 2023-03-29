@@ -36,7 +36,7 @@
     </developers>
 
     <scm>
-        <connection>scm:git:https://github.com:sniceio/snice-commons.git</connection>
+        <connection>scm:git:git@github.com:sniceio/snice-commons.git</connection>
         <developerConnection>scm:git:https://github.com:sniceio/snice-commons.git</developerConnection>
         <url>https://github.com:sniceio/snice-commons</url>
         <tag>snice-commons-release-0.1.10</tag>
