@@ -68,7 +68,7 @@ public interface Either<L, R> {
         }
 
         @Override
-        public void accept(Consumer<? super L> leftConsumer, Consumer<? super R> rightConsumer) {
+        public void accept(final Consumer<? super L> leftConsumer, final Consumer<? super R> rightConsumer) {
             assertNotNull(rightConsumer, "The right consumer cannot be null");
             rightConsumer.accept(value);
         }
@@ -114,7 +114,7 @@ public interface Either<L, R> {
         }
 
         @Override
-        public void accept(Consumer<? super L> leftConsumer, Consumer<? super R> rightConsumer) {
+        public void accept(final Consumer<? super L> leftConsumer, final Consumer<? super R> rightConsumer) {
             assertNotNull(leftConsumer, "The left consumer cannot be null");
             leftConsumer.accept(value);
         }

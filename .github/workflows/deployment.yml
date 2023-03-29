@@ -1,0 +1,45 @@
+name: "Release"
+
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+
+  # Runs the CI build on all PRs and branches.
+  # Publishes to Maven Central on pushes to the "release" branch.
+  build:
+    name: "Build & Release to Maven Central"
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: "Checkout sources"
+      uses: actions/checkout@v3
+
+    - name: "Setup Java"
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: 11
+        server-id: ossrh
+        server-username: OSSRH_USERNAME
+        server-password: OSSRH_PASSWORD
+        gpg-passphrase: GPG_PASSPHRASE
+        gpg-private-key: ${{ secrets.OSSRH_GPG_SECRET_KEY }}
+        cache: 'maven'
+
+    - name: "Run Maven build"
+      run: mvn -B package --file pom.xml
+
+    - name: "Publish to the Maven Central Repository"
+      # if: github.ref == 'refs/heads/release'
+      run: |
+        git config user.email "actions@github.com"
+        git config user.name "GitHub Actions"
+
+        mvn -B release:prepare release:perform -Dusername=$GITHUB_ACTOR -Dpassword=$GITHUB_TOKEN -P release
+      env:
+        OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME}}
+        OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD}}
+        GPG_PASSPHRASE: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}
