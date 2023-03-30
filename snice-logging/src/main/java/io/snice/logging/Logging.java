@@ -3,6 +3,9 @@ package io.snice.logging;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
 
+/**
+ * A mix-in interface with default methods for consistent logging.
+ */
 public interface Logging {
 
     Logger getLogger();
