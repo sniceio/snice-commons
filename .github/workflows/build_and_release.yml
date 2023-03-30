@@ -1,14 +1,12 @@
-name: "Release"
+name: "Build & Release"
 
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "whatever" ]
 
 jobs:
 
-  # Runs the CI build on all PRs and branches.
-  # Publishes to Maven Central on pushes to the "release" branch.
   build:
     name: "Build & Release to Maven Central"
     runs-on: ubuntu-latest
@@ -30,10 +28,9 @@ jobs:
         cache: 'maven'
 
     - name: "Run Maven build"
-      run: mvn -B package --file pom.xml
+      run: mvn -B verify --file pom.xml
 
     - name: "Publish to the Maven Central Repository"
-      # if: github.ref == 'refs/heads/release'
       run: |
         git config user.email "actions@github.com"
         git config user.name "GitHub Actions"
