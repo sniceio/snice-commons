@@ -24,7 +24,7 @@ import static io.snice.preconditions.PreConditions.assertNotNull;
 public interface Either<L, R> {
 
 
-    <U> U fold(Function<? super L, ? extends U> leftMapper, Function<? super R, ? extends U> rightMapper);
+    U> U fold(Function<? super L, ? extends U> leftMapper, Function<? super R, ? extends U> rightMapper);
 
     void accept(Consumer<? super L> leftConsumer, Consumer<? super R> rightConsumer);
 
