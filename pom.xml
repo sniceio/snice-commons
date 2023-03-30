@@ -15,7 +15,7 @@
     <name>Snice Commons</name>
     <groupId>io.snice</groupId>
     <artifactId>snice-commons-parent</artifactId>
-    <version>0.1.12</version>
+    <version>0.1.13-SNAPSHOT</version>
     <packaging>pom</packaging>
     <description>Snice Commons - Because even Super Nice things have things in Common</description>
     <licenses>
@@ -38,7 +38,7 @@
         <connection>scm:git:git@github.com:sniceio/snice-commons.git</connection>
         <developerConnection>scm:git:https://github.com/sniceio/snice-commons.git</developerConnection>
         <url>https://github.com:sniceio/snice-commons</url>
-        <tag>snice-commons-release-0.1.12</tag>
+        <tag>snice-commons-release-0.1.10</tag>
     </scm>
 
     <properties>
