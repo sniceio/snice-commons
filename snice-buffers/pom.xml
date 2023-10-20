@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.snice</groupId>
     <artifactId>snice-commons-parent</artifactId>
-    <version>0.1.14-SNAPSHOT</version>
+    <version>0.1.14</version>
   </parent>
 
   <name>Snice Buffer Lib</name>
