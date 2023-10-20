@@ -19,14 +19,39 @@ package com.google.polo.pairing;
 import java.nio.charset.Charset;
 
 public class HexDump {
-    private final static char[] HEX_DIGITS = {
+   private final static char[] HEX_DIGITS = {
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
+    private final static char[] HEX_DIGITS_LOWER_CASE = {
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+
+    /**
+     * Dump a byte array as hex, with the option to select whether the ABCDEF hex digits should be
+     * upper or lower case.
+     */
+    public static String dumpHexString(final byte[] array, boolean upperCase) {
+        return dumpHexString(array, 0, array.length, upperCase);
+    }
+
     public static String dumpHexString(final byte[] array) {
-        return dumpHexString(array, 0, array.length);
+        return dumpHexString(array, 0, array.length, true);
     }
 
     public static String dumpHexString(final byte[] array, final int offset, final int length) {
+        return dumpHexString(array, offset, length, true);
+    }
+
+    /**
+     * Dump the given byte array as a hex string, with the option to select whether the ABCDEF hex digits should be
+     * upper or lower case.
+     *
+     * @param array the byte array
+     * @param offset the offset into the byte array
+     * @param length the length of the byte array to dump
+     * @param upperCase flag indicating whether the ABCDEF hex digits should be upper or lower case.
+     * @return
+     */
+    public static String dumpHexString(final byte[] array, final int offset, final int length, boolean upperCase) {
         final StringBuilder result = new StringBuilder();
 
         final byte[] line = new byte[16];
@@ -84,11 +109,19 @@ public class HexDump {
     }
 
     public static String toHexString(final boolean prefix, final byte[] array) {
-        return toHexString(prefix, array, 0, array.length);
+        return toHexString(prefix, array, 0, array.length, true);
+    }
+
+    public static String toHexString(final boolean prefix, final byte[] array, final boolean upperCase) {
+        return toHexString(prefix, array, 0, array.length, upperCase);
+    }
+
+    public static String toHexString(final byte[] array, final boolean upperCase) {
+        return toHexString(true, array, 0, array.length, upperCase);
     }
 
     public static String toHexString(final byte[] array) {
-        return toHexString(true, array, 0, array.length);
+        return toHexString(true, array, 0, array.length, true);
     }
 
     public static String toHexString(final byte[] array, final int offset, final int length) {
@@ -96,6 +129,12 @@ public class HexDump {
     }
 
     public static String toHexString(final boolean prefix, final byte[] array, final int offset, final int length) {
+        return toHexString(prefix, array, offset, length, true);
+    }
+
+    public static String toHexString(final boolean prefix, final byte[] array, final int offset, final int length, boolean upperCase) {
+        final char[] alphabet = upperCase ? HEX_DIGITS : HEX_DIGITS_LOWER_CASE;
+
         final char[] buf;
         int bufIndex = 0;
 
@@ -112,8 +151,8 @@ public class HexDump {
 
         for (int i = offset; i < (offset + length); i++) {
             final byte b = array[i];
-            buf[bufIndex++] = HEX_DIGITS[(b >>> 4) & 0x0F];
-            buf[bufIndex++] = HEX_DIGITS[b & 0x0F];
+            buf[bufIndex++] = alphabet[(b >>> 4) & 0x0F];
+            buf[bufIndex++] = alphabet[b & 0x0F];
         }
 
         return new String(buf);
