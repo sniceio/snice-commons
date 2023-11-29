@@ -44,7 +44,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <slf4j.version>2.0.5</slf4j.version>
-        <logback.version>1.4.5</logback.version>
+        <logback.version>1.4.12</logback.version>
         <jackson.version>2.14.1</jackson.version>
         <logstash.version>7.2</logstash.version>
     </properties>
